@@ -292,6 +292,17 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
+        /* Build Info styling */
+        #build-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.5); /* Subtle text color */
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
         /* Media queries for responsiveness */
         @media (max-width: 768px) {
             .main-panel {
@@ -334,6 +345,12 @@
                 bottom: 10px;
                 right: 10px;
             }
+
+            #build-info {
+                bottom: 10px;
+                left: 10px;
+                font-size: 0.7rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -362,6 +379,12 @@
 
             #controls input[type="range"] {
                 width: 100px;
+            }
+
+            #build-info {
+                bottom: 5px;
+                left: 5px;
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -409,6 +432,9 @@
 
     <!-- Settings button -->
     <button id="settings-button" aria-label="Toggle Settings">⚙️</button>
+
+    <!-- Build Info -->
+    <div id="build-info">build v3.0 (beta) by FebruaryKid</div>
 
     <script>
         // Define color schemes
