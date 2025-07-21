@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Clock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Root variables from vmix_interface_test_8.html, updated for ZINC scheme */
+        :root {
+            --primary-color: #52525b; /* Zinc primary */
+            --secondary-color: #18181b; /* Zinc secondary */
+            --accent-color: #71717a; /* Zinc accent */
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #ffffff;
+            --glass-bg: rgba(8, 6, 7, 0.4);
+            /* New variables for typography refinements */
+            --text-shadow-color: rgba(255, 255, 255, 0.7);
+            --text-shadow-intensity: 15px;
+            /* New variable for background grid pattern */
+            --grid-color: rgba(255, 255, 255, 0.03); /* Very subtle grid lines */
+        }
+
+        /* Ensure no scrollbars by default and full viewport fill */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevent scrolling on html and body */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            cursor: default;
+            position: relative; /* For background decoration positioning */
+        }
+
+        /* Background decoration from vmix_interface_test_8.html */
+        .background-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .background-decoration::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            top: -50%;
+            left: -50%;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Main panel style from vmix_interface_test_8.html */
+        .main-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            padding: 5vw;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 90%;
+            height: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transform-origin: center;
+            transition: transform 0.3s ease-in-out;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Ensure grid pattern doesn't overflow */
+        }
+
+        /* Subtle grid pattern inside the main panel */
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(0deg, var(--grid-color) 0, var(--grid-color) 1px, transparent 1px, transparent 100px),
+                repeating-linear-gradient(90deg, var(--grid-color) 0, var(--grid-color) 1px, transparent 1px, transparent 100px);
+            background-size: 100px 100px;
+            opacity: 0.5; /* Make it subtle */
+            z-index: -1; /* Place behind other content */
+        }
+
+        /* Clock specific styles, adapted for the new UI */
+        #clock-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        #clock-circle {
+            position: relative;
+            width: 80%;
+            height: 80%;
+            max-width: 70vh;
+            max-height: 70vh;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #clock-text {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* Retro font style */
+            font-weight: 400; /* Retro font weight */
+            font-size: 6vw;
+            color: var(--text-color);
+            /* Using CSS variables for text shadow */
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
+            letter-spacing: 0.1em;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        #clock-text span {
+            font-variant-numeric: tabular-nums;
+            padding: 0 0.5vw;
+            display: inline-block;
+            text-align: center;
+            min-width: 3vw;
+            /* Smooth transition for visual feedback on change */
+            transition: text-shadow 0.2s ease-out, color 0.2s ease-out;
+        }
+
+        /* Accent for seconds - subtle pulse effect */
+        #seconds.second-pulse {
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.5) var(--accent-color); /* Stronger glow */
+            color: var(--accent-color); /* Change color slightly */
+            animation: pulse-second 0.5s ease-out;
+        }
+
+        @keyframes pulse-second {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+
+        #date-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 2vw;
+            color: rgba(255, 255, 255, 0.8);
+            /* Using CSS variables for text shadow */
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
+            margin-top: 20px;
+            text-align: center;
+            position: relative;
+            bottom: unset;
+            left: unset;
+            transform: unset;
+            z-index: 2;
+            white-space: nowrap;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 768px) {
+            .main-panel {
+                padding: 30px;
+                width: 95%;
+                height: 95%;
+                border-radius: 30px;
+            }
+
+            #clock-circle {
+                width: 90%;
+                height: 90%;
+            }
+
+            #clock-text {
+                font-size: 10vw;
+            }
+
+            #clock-text span {
+                padding: 0 1vw;
+                min-width: 5vw;
+            }
+
+            #date-text {
+                font-size: 3.5vw;
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-panel {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            #clock-circle {
+                width: 95%;
+                height: 95%;
+            }
+
+            #clock-text {
+                font-size: 14vw;
+            }
+
+            #clock-text span {
+                padding: 0 1.5vw;
+                min-width: 7vw;
+            }
+
+            #date-text {
+                font-size: 4.5vw;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background decoration from vmix_interface_test_8.html -->
+    <div class="background-decoration"></div>
+
+    <div class="main-panel">
+        <!-- Subtle grid pattern inside the main panel -->
+        <div class="grid-pattern"></div>
+
+        <div id="clock-container">
+            <div id="clock-circle">
+                <div id="clock-text">
+                    <span id="hours">00</span>:
+                    <span id="minutes">00</span>:
+                    <span id="seconds">00</span>
+                </div>
+                <div id="date-text">January 1, 2024</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+
+            const secondsSpan = document.getElementById('seconds');
+            // Apply pulse effect to seconds when it changes
+            if (secondsSpan.textContent !== seconds) {
+                secondsSpan.classList.remove('second-pulse'); // Remove to re-trigger animation
+                void secondsSpan.offsetWidth; // Trigger reflow
+                secondsSpan.classList.add('second-pulse');
+            }
+            secondsSpan.textContent = seconds;
+
+
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            const dayName = days[now.getDay()];
+            const monthName = months[now.getMonth()];
+            const day = now.getDate();
+            const year = now.getFullYear();
+
+            const dateString = `${dayName}, ${monthName} ${day}, ${year}`;
+            document.getElementById('date-text').textContent = dateString;
+        }
+
+        // Initial call and set interval for updates
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
