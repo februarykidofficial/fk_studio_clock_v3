@@ -22,6 +22,16 @@
             --text-shadow-intensity: 15px;
             /* New variable for background grid pattern */
             --grid-color: rgba(255, 255, 255, 0.03); /* Very subtle grid lines */
+            /* New variables for dynamic sizing */
+            --layout-scale-factor: 1.5; /* Updated default to max */
+            --font-scale-factor: 1.2; /* Updated default to max */
+            --base-clock-font-size: 6vw; /* Original 6vw */
+            --base-date-font-size: 2vw;  /* Original 2vw */
+            --base-main-panel-width: 90%;
+            --base-main-panel-height: 90%;
+            --base-main-panel-padding: 5vw;
+            --base-clock-circle-width: 80%;
+            --base-clock-circle-height: 80%;
         }
 
         /* Ensure no scrollbars by default and full viewport fill */
@@ -83,12 +93,14 @@
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-radius: 50px;
-            padding: 5vw;
+            /* Use calc for dynamic padding */
+            padding: calc(var(--base-main-panel-padding) * var(--layout-scale-factor));
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 900px;
-            width: 90%;
-            height: 90%;
+            max-width: calc(900px * var(--layout-scale-factor)); /* Scale max-width */
+            /* Use calc for dynamic width and height */
+            width: calc(var(--base-main-panel-width) * var(--layout-scale-factor));
+            height: calc(var(--base-main-panel-height) * var(--layout-scale-factor));
             text-align: center;
             position: relative;
             z-index: 1;
@@ -100,6 +112,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden; /* Ensure grid pattern doesn't overflow */
+            /* Removed transform: scale() */
         }
 
         /* Subtle grid pattern inside the main panel */
@@ -129,10 +142,11 @@
 
         #clock-circle {
             position: relative;
-            width: 80%;
-            height: 80%;
-            max-width: 70vh;
-            max-height: 70vh;
+            /* Use calc for dynamic width and height */
+            width: calc(var(--base-clock-circle-width) * var(--layout-scale-factor));
+            height: calc(var(--base-clock-circle-height) * var(--layout-scale-factor));
+            max-width: calc(70vh * var(--layout-scale-factor)); /* Scale max-width */
+            max-height: calc(70vh * var(--layout-scale-factor)); /* Scale max-height */
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -144,7 +158,7 @@
         #clock-text {
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* Retro font style */
             font-weight: 400; /* Retro font weight */
-            font-size: 6vw;
+            font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor)); /* Apply font scale */
             color: var(--text-color);
             /* Using CSS variables for text shadow */
             text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
@@ -185,7 +199,7 @@
 
         #date-text {
             font-family: 'Inter', sans-serif;
-            font-size: 2vw;
+            font-size: calc(var(--base-date-font-size) * var(--font-scale-factor)); /* Apply font scale */
             color: rgba(255, 255, 255, 0.8);
             /* Using CSS variables for text shadow */
             text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
@@ -199,58 +213,134 @@
             white-space: nowrap;
         }
 
+        /* Controls styling */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            /* Hidden by default, with transition */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        /* Settings button styling */
+        #settings-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 50%; /* Make it circular */
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+            z-index: 11; /* Ensure it's above controls */
+        }
+
+        #settings-button:hover {
+            background: #0e9f6e; /* Slightly darker accent */
+            transform: translateY(-2px);
+        }
+
+        #settings-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
         /* Media queries for responsiveness */
         @media (max-width: 768px) {
             .main-panel {
-                padding: 30px;
-                width: 95%;
-                height: 95%;
-                border-radius: 30px;
+                padding: calc(30px * var(--layout-scale-factor));
+                width: calc(95% * var(--layout-scale-factor));
+                height: calc(95% * var(--layout-scale-factor));
+                border-radius: calc(30px * var(--layout-scale-factor));
             }
 
             #clock-circle {
-                width: 90%;
-                height: 90%;
+                width: calc(90% * var(--layout-scale-factor));
+                height: calc(90% * var(--layout-scale-factor));
             }
 
             #clock-text {
-                font-size: 10vw;
+                font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
             }
 
             #clock-text span {
-                padding: 0 1vw;
-                min-width: 5vw;
+                padding: calc(0 * var(--layout-scale-factor)) calc(1vw * var(--layout-scale-factor));
+                min-width: calc(5vw * var(--layout-scale-factor));
             }
 
             #date-text {
-                font-size: 3.5vw;
-                margin-top: 10px;
+                font-size: calc(var(--base-date-font-size) * var(--font-scale-factor));
+                margin-top: calc(10px * var(--layout-scale-factor));
+            }
+
+            #controls {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 15px;
+                width: auto; /* Allow content to dictate width */
+                bottom: 10px;
+            }
+
+            #settings-button {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                bottom: 10px;
+                right: 10px;
             }
         }
 
         @media (max-width: 480px) {
             .main-panel {
-                padding: 20px;
-                border-radius: 20px;
+                padding: calc(20px * var(--layout-scale-factor));
+                border-radius: calc(20px * var(--layout-scale-factor));
             }
 
             #clock-circle {
-                width: 95%;
-                height: 95%;
+                width: calc(95% * var(--layout-scale-factor));
+                height: calc(95% * var(--layout-scale-factor));
             }
 
             #clock-text {
-                font-size: 14vw;
+                font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
             }
 
             #clock-text span {
-                padding: 0 1.5vw;
-                min-width: 7vw;
+                padding: calc(0 * var(--layout-scale-factor)) calc(1.5vw * var(--layout-scale-factor));
+                min-width: calc(7vw * var(--layout-scale-factor));
             }
 
             #date-text {
-                font-size: 4.5vw;
-                margin-top: 5px;
+                font-size: calc(var(--base-date-font-size) * var(--font-scale-factor));
+                margin-top: calc(5px * var(--layout-scale-factor));
+            }
+
+            #controls input[type="range"] {
+                width: 100px;
             }
         }
     </style>
@@ -274,6 +364,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Controls for layout and font size -->
+    <div id="controls">
+        <label for="layoutScaleSlider">Layout Scale:</label>
+        <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+
+        <label for="fontScaleSlider">Font Scale:</label>
+        <input type="range" id="fontScaleSlider" min="0.8" max="1.2" step="0.01" value="1.2">
+    </div>
+
+    <!-- Settings button -->
+    <button id="settings-button" aria-label="Toggle Settings">⚙️</button>
 
     <script>
         function updateClock() {
@@ -310,6 +412,34 @@
             const dateString = `${dayName}, ${monthName} ${day}, ${year}`;
             document.getElementById('date-text').textContent = dateString;
         }
+
+        // Get references to elements
+        const root = document.documentElement;
+        const layoutScaleSlider = document.getElementById('layoutScaleSlider');
+        const fontScaleSlider = document.getElementById('fontScaleSlider');
+        const controlsDiv = document.getElementById('controls');
+        const settingsButton = document.getElementById('settings-button');
+
+        // Event listener for layout scale slider
+        layoutScaleSlider.addEventListener('input', (event) => {
+            root.style.setProperty('--layout-scale-factor', event.target.value);
+        });
+
+        // Event listener for font scale slider
+        fontScaleSlider.addEventListener('input', (event) => {
+            root.style.setProperty('--font-scale-factor', event.target.value);
+        });
+
+        // Event listener for settings button to toggle controls visibility
+        settingsButton.addEventListener('click', () => {
+            if (controlsDiv.style.opacity === '0' || controlsDiv.style.opacity === '') {
+                controlsDiv.style.opacity = '1';
+                controlsDiv.style.visibility = 'visible';
+            } else {
+                controlsDiv.style.opacity = '0';
+                controlsDiv.style.visibility = 'hidden';
+            }
+        });
 
         // Initial call and set interval for updates
         updateClock();
