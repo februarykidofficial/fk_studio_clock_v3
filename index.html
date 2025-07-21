@@ -18,8 +18,8 @@
             --text-color: #ffffff;
             --glass-bg: rgba(8, 6, 7, 0.4);
             /* New variables for typography refinements */
-            --text-shadow-color: rgba(255, 255, 255, 0.7);
-            --text-shadow-intensity: 15px;
+            --text-shadow-color: rgba(255, 255, 255, 0.9); /* More opaque for stronger glow */
+            --text-shadow-intensity: 35px; /* Further increased intensity for more glow */
             /* New variable for background grid pattern */
             --grid-color: rgba(255, 255, 255, 0.03); /* Very subtle grid lines */
             /* New variables for dynamic sizing */
@@ -161,7 +161,7 @@
             font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor)); /* Apply font scale */
             color: var(--text-color);
             /* Using CSS variables for text shadow */
-            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color); /* Uses updated intensity */
             letter-spacing: 0.1em;
             text-align: center;
             position: relative;
@@ -185,7 +185,7 @@
 
         /* Accent for seconds - subtle pulse effect */
         #seconds.second-pulse {
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.5) var(--accent-color); /* Stronger glow */
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.8) var(--accent-color); /* Stronger glow for pulse */
             color: var(--accent-color); /* Change color slightly */
             animation: pulse-second 0.5s ease-out;
         }
@@ -202,7 +202,7 @@
             font-size: calc(var(--base-date-font-size) * var(--font-scale-factor)); /* Apply font scale */
             color: rgba(255, 255, 255, 0.8);
             /* Using CSS variables for text shadow */
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color); /* Uses updated intensity */
             margin-top: 20px;
             text-align: center;
             position: relative;
