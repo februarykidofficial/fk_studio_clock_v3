@@ -19,12 +19,12 @@
             --glass-bg: rgba(8, 6, 7, 0.4);
             /* New variables for typography refinements */
             --text-shadow-color: rgba(255, 255, 255, 1); /* Fully opaque for maximum glow */
-            --text-shadow-intensity: 50px; /* Significantly increased intensity for more glow */
+            --text-shadow-intensity: 70px; /* Significantly increased intensity for more glow */
             /* New variable for background grid pattern */
             --grid-color: rgba(255, 255, 255, 0.03); /* Very subtle grid lines */
             /* New variables for dynamic sizing */
             --layout-scale-factor: 1.5; /* Updated default to max */
-            --font-scale-factor: 1.5; /* Increased default font scale */
+            --font-scale-factor: 1.8; /* Increased default font scale */
             --base-clock-font-size: 6vw; /* Original 6vw */
             --base-date-font-size: 2vw;  /* Original 2vw */
             --base-main-panel-width: 90%;
@@ -227,7 +227,7 @@
             color: rgba(255, 255, 255, 0.8);
             /* Using CSS variables for text shadow */
             text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color); /* Uses updated intensity */
-            margin-top: 20px;
+            margin-top: -10px; /* Adjusted to move significantly higher */
             text-align: center;
             position: relative;
             bottom: unset;
@@ -317,8 +317,7 @@
             }
 
             #date-text {
-                font-size: calc(var(--base-date-font-size) * var(--font-scale-factor));
-                margin-top: calc(10px * var(--layout-scale-factor));
+                margin-top: calc(-5px * var(--layout-scale-factor)); /* Adjusted for smaller screens */
             }
 
             #controls {
@@ -359,8 +358,7 @@
             }
 
             #date-text {
-                font-size: calc(var(--base-date-font-size) * var(--font-scale-factor));
-                margin-top: calc(5px * var(--layout-scale-factor));
+                margin-top: calc(-10px * var(--layout-scale-factor)); /* Adjusted for smallest screens */
             }
 
             #controls input[type="range"] {
@@ -395,7 +393,7 @@
         <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
 
         <label for="fontScaleSlider">Font Scale:</label>
-        <input type="range" id="fontScaleSlider" min="0.8" max="1.5" step="0.01" value="1.5"> <!-- Increased max and default value -->
+        <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.8"> <!-- Increased max and default value -->
     </div>
 
     <!-- Settings button -->
