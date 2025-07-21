@@ -394,12 +394,87 @@
 
         <label for="fontScaleSlider">Font Scale:</label>
         <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.8">
+
+        <div class="color-scheme-control">
+            <label for="colorSchemeSelect">Color Scheme:</label>
+            <select id="colorSchemeSelect" class="bg-gray-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-color">
+                <option value="zinc">Zinc (Default)</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="red">Red</option>
+                <option value="purple">Purple</option>
+            </select>
+        </div>
     </div>
 
     <!-- Settings button -->
     <button id="settings-button" aria-label="Toggle Settings">⚙️</button>
 
     <script>
+        // Define color schemes
+        const colorSchemes = {
+            zinc: {
+                '--primary-color': '#52525b',
+                '--secondary-color': '#18181b',
+                '--accent-color': '#71717a',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(8, 6, 7, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
+                '--border-animation-color': '#ff00ff'
+            },
+            blue: {
+                '--primary-color': '#1a202c',
+                '--secondary-color': '#2b6cb0',
+                '--accent-color': '#4299e1',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(26, 32, 44, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
+                '--border-animation-color': '#00ffff'
+            },
+            green: {
+                '--primary-color': '#102e1c',
+                '--secondary-color': '#2f855a',
+                '--accent-color': '#48bb78',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(16, 46, 28, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
+                '--border-animation-color': '#00ff00'
+            },
+            red: {
+                '--primary-color': '#3a0f1f',
+                '--secondary-color': '#c53030',
+                '--accent-color': '#e53e3e',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(58, 15, 31, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
+                '--border-animation-color': '#ff0000'
+            },
+            purple: {
+                '--primary-color': '#2a0a3a',
+                '--secondary-color': '#805ad5',
+                '--accent-color': '#9f7aea',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(42, 10, 58, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
+                '--border-animation-color': '#8a2be2'
+            }
+        };
+
         function updateClock() {
             const now = new Date();
             let hours = now.getHours();
@@ -435,12 +510,22 @@
             document.getElementById('date-text').textContent = dateString;
         }
 
+        function applyColorScheme(schemeName) {
+            const scheme = colorSchemes[schemeName];
+            if (scheme) {
+                for (const [prop, value] of Object.entries(scheme)) {
+                    root.style.setProperty(prop, value);
+                }
+            }
+        }
+
         // Get references to elements
         const root = document.documentElement;
         const layoutScaleSlider = document.getElementById('layoutScaleSlider');
         const fontScaleSlider = document.getElementById('fontScaleSlider');
         const controlsDiv = document.getElementById('controls');
         const settingsButton = document.getElementById('settings-button');
+        const colorSchemeSelect = document.getElementById('colorSchemeSelect');
 
         // Event listener for layout scale slider
         layoutScaleSlider.addEventListener('input', (event) => {
@@ -461,6 +546,11 @@
                 controlsDiv.style.opacity = '0';
                 controlsDiv.style.visibility = 'hidden';
             }
+        });
+
+        // Event listener for color scheme select
+        colorSchemeSelect.addEventListener('change', (event) => {
+            applyColorScheme(event.target.value);
         });
 
         // Initial call and set interval for updates
