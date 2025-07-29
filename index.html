@@ -278,7 +278,7 @@
             top: 50%;
             left: 50%;
             width: 2px;
-            height: 40%; /* Adjusted to be shorter */
+            height: 45%; /* Made longer */
             background-color: var(--accent-color);
             transform-origin: bottom center;
             transform: translateX(-50%) translateY(-100%) rotate(0deg);
@@ -1126,8 +1126,7 @@
 
         // Global variable for analog seconds dots
         let analogSecondDotsElements = [];
-        // Adjusted to match the new analog hand length
-        const ANALOG_DOT_RADIUS_PERCENT = 40; // Distance from center for the dots (percentage of clock-circle radius)
+        const ANALOG_DOT_RADIUS_PERCENT = 45; // Distance from center for the dots (percentage of clock-circle radius)
         const ANALOG_DOT_SIZE_PX = 6; // Size of the dot in pixels
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1733,8 +1732,7 @@
                     }
                 } else if (selectedSecondHandStyle === 'bouncing-dot') {
                     bouncingDot.style.display = 'block';
-                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
-                    const radius = ANALOG_DOT_RADIUS_PERCENT;
+                    const radius = 45;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
@@ -1748,8 +1746,7 @@
                     pulsingGlowText.style.animation = 'pulse-glow 1s infinite alternate';
                 } else if (selectedSecondHandStyle === 'bouncing-tail-dot') {
                     bouncingTailDotContainer.style.display = 'block';
-                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
-                    const radius = ANALOG_DOT_RADIUS_PERCENT;
+                    const radius = 45;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
