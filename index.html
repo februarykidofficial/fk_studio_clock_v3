@@ -3,37 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Clock</title>
+    <title>Advanced Broadcast Clock</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts for clock and general text -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- New fonts for digital style -->
+    <link href="https://fonts.googleapis.com/css2?family=Digital-7&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap" rel="stylesheet">
+
     <style>
-        /* Root variables from vmix_interface_test_8.html, updated for ZINC scheme */
+        /* Root variables for theming and scaling */
         :root {
-            --primary-color: #52525b; /* Zinc primary */
-            --secondary-color: #18181b; /* Zinc secondary */
-            --accent-color: #71717a; /* Zinc accent */
+            /* Color Scheme - Digital Matrix (Default) */
+            --primary-color: #000000;
+            --secondary-color: #001a00;
+            --accent-color: #00ff00;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
             --text-color: #ffffff;
-            --glass-bg: rgba(8, 6, 7, 0.4);
-            /* New variables for typography refinements */
-            --text-shadow-color: rgba(255, 255, 255, 1); /* Fully opaque for maximum glow */
-            --text-shadow-intensity: 70px; /* Significantly increased intensity for more glow */
-            /* New variable for background grid pattern */
-            --grid-color: rgba(255, 255, 255, 0.03); /* Very subtle grid lines */
-            /* New variables for dynamic sizing */
-            --layout-scale-factor: 1.5; /* Updated default to max */
-            --font-scale-factor: 1.8; /* Increased default font scale */
-            --base-clock-font-size: 6vw; /* Original 6vw */
-            --base-date-font-size: 2vw;  /* Original 2vw */
+            --glass-bg: rgba(0, 26, 0, 0.4);
+            --text-shadow-color: rgba(0, 255, 0, 1); /* Green glow for digital matrix */
+            --text-shadow-intensity: 70px;
+            --grid-color: rgba(0, 255, 0, 0.05); /* Green grid */
+
+            /* Background Themes */
+            --background-gradient-start: var(--primary-color);
+            --background-gradient-end: var(--secondary-color);
+
+            /* Dynamic Sizing */
+            --layout-scale-factor: 1.5;
+            --font-scale-factor: 1.0;
+            --base-clock-font-size: 6vw;
+            --base-date-font-size: 2vw;
             --base-main-panel-width: 90%;
             --base-main-panel-height: 90%;
             --base-main-panel-padding: 5vw;
             --base-clock-circle-width: 80%;
             --base-clock-circle-height: 80%;
-            /* New variable for the border animation color */
-            --border-animation-color: #ff00ff; /* Pink/Violet color for the border line */
+
+            /* Font Families */
+            --clock-font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* New default font */
+            --date-font-family: 'Inter', sans-serif;
+            --control-font-family: 'Inter', sans-serif;
         }
 
         /* Ensure no scrollbars by default and full viewport fill */
@@ -42,9 +59,9 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: hidden; /* Prevent scrolling on html and body */
-            position: relative; /* Needed for the absolute positioning of the border animation */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
         }
 
         * {
@@ -52,38 +69,18 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            font-family: var(--control-font-family);
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             color: var(--text-color);
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content vertically */
-            align-items: center; /* Center content horizontally */
+            justify-content: center;
+            align-items: center;
             cursor: default;
-            position: relative; /* For background decoration positioning */
+            position: relative;
         }
 
-        /* SVG for the full-screen border animation */
-        #viewport-border-svg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5; /* Above background, below main content */
-            pointer-events: none; /* Ensure it doesn't block interactions */
-            overflow: visible; /* Allow filter effects to extend beyond SVG bounds */
-        }
-
-        #time-progress-rect {
-            fill: none;
-            stroke: var(--border-animation-color);
-            stroke-width: 3; /* Thin line */
-            filter: url(#glowFilter); /* Apply glow filter */
-            /* These will be set by JS: stroke-dasharray, stroke-dashoffset */
-        }
-
-        /* Background decoration from vmix_interface_test_8.html */
+        /* Background decoration */
         .background-decoration {
             position: fixed;
             top: 0;
@@ -112,17 +109,15 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
-        /* Main panel style from vmix_interface_test_8.html */
+        /* Main panel style */
         .main-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-radius: 50px;
-            /* Use calc for dynamic padding */
             padding: calc(var(--base-main-panel-padding) * var(--layout-scale-factor));
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: calc(900px * var(--layout-scale-factor)); /* Scale max-width */
-            /* Use calc for dynamic width and height */
+            max-width: calc(900px * var(--layout-scale-factor));
             width: calc(var(--base-main-panel-width) * var(--layout-scale-factor));
             height: calc(var(--base-main-panel-height) * var(--layout-scale-factor));
             text-align: center;
@@ -135,8 +130,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Ensure grid pattern doesn't overflow */
-            /* Removed transform: scale() */
+            overflow: hidden;
         }
 
         /* Subtle grid pattern inside the main panel */
@@ -150,11 +144,11 @@
                 repeating-linear-gradient(0deg, var(--grid-color) 0, var(--grid-color) 1px, transparent 1px, transparent 100px),
                 repeating-linear-gradient(90deg, var(--grid-color) 0, var(--grid-color) 1px, transparent 1px, transparent 100px);
             background-size: 100px 100px;
-            opacity: 0.5; /* Make it subtle */
-            z-index: -1; /* Place behind other content */
+            opacity: 0.5;
+            z-index: -1;
         }
 
-        /* Clock specific styles, adapted for the new UI */
+        /* Clock specific styles */
         #clock-container {
             display: flex;
             justify-content: center;
@@ -166,11 +160,10 @@
 
         #clock-circle {
             position: relative;
-            /* Use calc for dynamic width and height */
             width: calc(var(--base-clock-circle-width) * var(--layout-scale-factor));
             height: calc(var(--base-clock-circle-height) * var(--layout-scale-factor));
-            max-width: calc(70vh * var(--layout-scale-factor)); /* Scale max-width */
-            max-height: calc(70vh * var(--layout-scale-factor)); /* Scale max-height */
+            max-width: calc(70vh * var(--layout-scale-factor));
+            max-height: calc(70vh * var(--layout-scale-factor));
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -180,12 +173,11 @@
         }
 
         #clock-text {
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* Retro font style */
-            font-weight: 400; /* Retro font weight */
-            font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor)); /* Apply font scale */
+            font-family: var(--clock-font-family);
+            font-weight: 400;
+            font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
             color: var(--text-color);
-            /* Using CSS variables for text shadow */
-            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color); /* Uses updated intensity */
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
             letter-spacing: 0.1em;
             text-align: center;
             position: relative;
@@ -203,14 +195,13 @@
             display: inline-block;
             text-align: center;
             min-width: 3vw;
-            /* Smooth transition for visual feedback on change */
             transition: text-shadow 0.2s ease-out, color 0.2s ease-out;
         }
 
         /* Accent for seconds - subtle pulse effect */
         #seconds.second-pulse {
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.8) var(--accent-color); /* Stronger glow for pulse */
-            color: var(--accent-color); /* Change color slightly */
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.8) var(--accent-color);
+            color: var(--accent-color);
             animation: pulse-second 0.5s ease-out;
         }
 
@@ -220,20 +211,78 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
+        /* Second Hand (Analog Style) */
+        #second-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 40%;
+            background-color: var(--accent-color);
+            transform-origin: bottom center;
+            transform: translateX(-50%) translateY(-100%) rotate(0deg);
+            border-radius: 2px;
+            z-index: 0;
+            filter: drop-shadow(0 0 5px var(--accent-color));
+            transition: transform 0.1s linear;
+        }
+
+        /* Small circle at the center of the second hand */
+        #second-hand::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 5px var(--text-color);
+        }
 
         #date-text {
-            font-family: 'Inter', sans-serif;
-            font-size: calc(var(--base-date-font-size) * var(--font-scale-factor)); /* Apply font scale */
+            font-family: var(--date-font-family);
+            font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
             color: rgba(255, 255, 255, 0.8);
-            /* Using CSS variables for text shadow */
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color); /* Uses updated intensity */
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
             text-align: center;
-            position: absolute; /* Changed to absolute positioning */
-            top: 20%; /* Adjust this value to move it higher/lower */
+            position: absolute;
+            top: 20%;
             left: 50%;
-            transform: translateX(-50%); /* Center horizontally */
+            transform: translateX(-50%);
             z-index: 2;
             white-space: nowrap;
+        }
+
+        /* "ON AIR" Indicator */
+        #on-air-indicator {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--danger-color);
+            color: var(--text-color);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-family: var(--control-font-family);
+            font-weight: bold;
+            font-size: calc(1.5vw * var(--layout-scale-factor) * var(--font-scale-factor));
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 10px var(--danger-color);
+            box-shadow: 0 0 15px var(--danger-color);
+            display: none;
+            z-index: 3;
+        }
+
+        #on-air-indicator.blinking {
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
 
         /* Controls styling */
@@ -250,15 +299,145 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             z-index: 10;
             display: flex;
+            flex-wrap: wrap;
             gap: 20px;
             align-items: center;
             color: var(--text-color);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--control-font-family);
             font-size: 0.9rem;
-            /* Hidden by default, with transition */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            max-width: 95%;
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #controls label {
+            white-space: nowrap;
+        }
+
+        #controls input[type="range"],
+        #controls select,
+        #controls input[type="number"],
+        #controls input[type="time"] {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 5px 10px;
+            color: var(--text-color);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        #controls select:focus,
+        #controls input[type="range"]:focus,
+        #controls input[type="number"]:focus,
+        #controls input[type="time"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.5);
+        }
+
+        #controls select {
+            padding-right: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+        }
+
+        #controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            margin-top: -6px;
+        }
+
+        #controls input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        #controls input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        #controls input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        /* Toggle button for on-air indicator */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--danger-color);
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px var(--danger-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
         }
 
         /* Settings button styling */
@@ -266,10 +445,10 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: var(--accent-color);
-            color: var(--text-color);
+            background: transparent; /* Crystal clear */
+            color: white; /* Always white for visibility */
             border: none;
-            border-radius: 50%; /* Make it circular */
+            border-radius: 50%;
             width: 50px;
             height: 50px;
             display: flex;
@@ -277,19 +456,20 @@
             align-items: center;
             font-size: 1.5rem;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
-            z-index: 11; /* Ensure it's above controls */
+            box-shadow: none; /* No shadow */
+            transition: transform 0.2s ease-in-out;
+            z-index: 11;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5); /* Subtle white glow for visibility */
         }
 
         #settings-button:hover {
-            background: #0e9f6e; /* Slightly darker accent */
             transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(255,255,255,0.8); /* Stronger glow on hover */
         }
 
         #settings-button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 0 2px rgba(255,255,255,0.3);
         }
 
         /* Build Info styling */
@@ -297,11 +477,72 @@
             position: fixed;
             bottom: 20px;
             left: 20px;
-            color: rgba(255, 255, 255, 0.5); /* Subtle text color */
-            font-family: 'Inter', sans-serif;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: var(--control-font-family);
             font-size: 0.8rem;
             z-index: 10;
         }
+
+        /* Schedule Modal Styling */
+        #schedule-modal {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        #schedule-modal > div {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            color: var(--text-color);
+        }
+
+        #schedule-list {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .schedule-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .schedule-entry:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-entry .days {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .schedule-entry button {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .schedule-entry button:hover {
+            background-color: #c53030;
+        }
+
+        .schedule-entry .edit-btn {
+            background-color: var(--accent-color);
+            margin-right: 5px;
+        }
+        .schedule-entry .edit-btn:hover {
+            background-color: #0e9f6e;
+        }
+
 
         /* Media queries for responsiveness */
         @media (max-width: 768px) {
@@ -318,7 +559,7 @@
             }
 
             #clock-text {
-                font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
+                font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
             }
 
             #clock-text span {
@@ -327,14 +568,19 @@
             }
 
             #date-text {
-                top: 15%; /* Adjust for smaller screens */
+                top: 15%;
+                font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            }
+
+            #on-air-indicator {
+                font-size: calc(2vw * var(--layout-scale-factor) * var(--font-scale-factor));
             }
 
             #controls {
                 flex-direction: column;
                 gap: 10px;
                 padding: 10px 15px;
-                width: auto; /* Allow content to dictate width */
+                width: auto;
                 bottom: 10px;
             }
 
@@ -351,6 +597,11 @@
                 left: 10px;
                 font-size: 0.7rem;
             }
+
+            #schedule-modal > div {
+                width: 95%;
+                padding: 20px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -365,7 +616,7 @@
             }
 
             #clock-text {
-                font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
+                font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
             }
 
             #clock-text span {
@@ -374,7 +625,12 @@
             }
 
             #date-text {
-                top: 10%; /* Adjust for smallest screens */
+                top: 10%;
+                font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            }
+
+            #on-air-indicator {
+                font-size: calc(2.5vw * var(--layout-scale-factor) * var(--font-scale-factor));
             }
 
             #controls input[type="range"] {
@@ -390,12 +646,15 @@
     </style>
 </head>
 <body>
-    <!-- Background decoration from vmix_interface_test_8.html -->
+    <!-- Background decoration -->
     <div class="background-decoration"></div>
 
     <div class="main-panel">
         <!-- Subtle grid pattern inside the main panel -->
         <div class="grid-pattern"></div>
+
+        <!-- ON AIR Indicator -->
+        <div id="on-air-indicator">ON AIR</div>
 
         <div id="clock-container">
             <div id="clock-circle">
@@ -404,6 +663,8 @@
                     <span id="minutes">00</span>:
                     <span id="seconds">00</span>
                 </div>
+                <!-- Second Hand (Analog Style) -->
+                <div id="second-hand"></div>
             </div>
         </div>
         <!-- Date text moved outside clock-circle for independent positioning -->
@@ -412,21 +673,148 @@
 
     <!-- Controls for layout and font size -->
     <div id="controls">
-        <label for="layoutScaleSlider">Layout Scale:</label>
-        <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+        <div class="control-group">
+            <label for="layoutScaleSlider">Layout Scale:</label>
+            <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+        </div>
 
-        <label for="fontScaleSlider">Font Scale:</label>
-        <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.8">
+        <div class="control-group">
+            <label for="fontScaleSlider">Font Scale:</label>
+            <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.0">
+        </div>
 
-        <div class="color-scheme-control">
+        <div class="control-group">
             <label for="colorSchemeSelect">Color Scheme:</label>
-            <select id="colorSchemeSelect" class="bg-gray-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-color">
+            <select id="colorSchemeSelect">
                 <option value="zinc">Zinc (Default)</option>
                 <option value="blue">Blue</option>
                 <option value="green">Green</option>
                 <option value="red">Red</option>
                 <option value="purple">Purple</option>
+                <option value="orange">Orange</option>
+                <option value="teal">Teal</option>
+                <option value="pink">Pink</option>
+                <option value="gold">Gold</option>
+                <option value="emerald">Emerald</option>
+                <option value="indigo">Indigo</option>
+                <option value="sunrise">Sunrise</option>
+                <option value="twilight">Twilight</option>
+                <option value="mint">Mint</option>
             </select>
+        </div>
+
+        <div class="control-group">
+            <label for="backgroundThemeSelect">Background Theme:</label>
+            <select id="backgroundThemeSelect">
+                <option value="default">Default Gradient</option>
+                <option value="nebula">Nebula</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="forest">Forest</option>
+                <option value="ocean">Ocean Depths</option>
+                <option value="sunset">Sunset Glow</option>
+                <option value="starlight">Starlight</option>
+                <option value="geometric">Geometric</option>
+                <option value="abstract-waves">Abstract Waves</option>
+                <option value="digital-matrix">Digital Matrix</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="clockFontSelect">Clock Font:</label>
+            <select id="clockFontSelect">
+                <option value="sf-mono">SF Mono (Retro)</option> <!-- Default changed -->
+                <option value="digital-7">Digital-7</option>
+                <option value="share-tech-mono">Share Tech Mono</option>
+                <option value="vt323">VT323</option>
+                <option value="press-start-2p">Press Start 2P</option>
+                <option value="monoton">Monoton</option>
+                <option value="bungee">Bungee</option>
+                <option value="space-mono">Space Mono</option>
+                <option value="cutive-mono">Cutive Mono</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="dateFormatSelect">Date Format:</label>
+            <select id="dateFormatSelect">
+                <option value="short-dmy">DD/MM/YYYY</option>         <!-- Default changed -->
+                <option value="full">Weekday, Month Day, Year</option>
+                <option value="short-mdy">MM/DD/YYYY</option>
+                <option value="iso">YYYY-MM-DD</option>
+                <option value="long-date-time">Weekday, Month Day, Year, HH:MM:SS</option>
+                <option value="short-date-time">MM/DD/YYYY HH:MM</option>
+                <option value="day-month">Day Month</option>
+                <option value="day-month-year">Day Month Year</option>
+                <option value="time-only">Time Only</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="timeZoneSelect">Time Zone:</label>
+            <select id="timeZoneSelect">
+                <option value="Europe/Warsaw">CET (Warsaw)</option> <!-- Default changed -->
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">EST (New York)</option>
+                <option value="America/Los_Angeles">PST (Los Angeles)</option>
+                <option value="Europe/London">GMT (London)</option>
+                <option value="Europe/Berlin">CET (Berlin)</option>
+                <option value="Asia/Tokyo">JST (Tokyo)</option>
+                <option value="Australia/Sydney">AEST (Sydney)</option>
+            </select>
+        </div>
+
+        <div class="control-group flex items-center gap-2">
+            <label for="onAirToggle">Manual ON AIR:</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="onAirToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <button id="openScheduleModal" class="bg-accent-color text-white p-2 rounded-md hover:bg-green-600 transition-colors">Manage ON AIR Schedule</button>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md relative">
+            <button id="close-schedule-modal" class="absolute top-4 right-4 text-white text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">ON AIR Schedule</h2>
+
+            <div class="control-group mb-4">
+                <label for="onAirScheduleToggle">Enable Schedule:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="onAirScheduleToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div id="schedule-list" class="mb-6 max-h-60 overflow-y-auto pr-2">
+                <!-- Schedule entries will be rendered here by JS -->
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-4">Add New Event</h3>
+            <div class="flex flex-col gap-4">
+                <div class="flex gap-2 items-center">
+                    <label for="newStartTime" class="text-white">Start:</label>
+                    <input type="time" id="newStartTime" class="flex-grow bg-gray-700 text-white p-2 rounded-md">
+                    <label for="newEndTime" class="text-white">End:</label>
+                    <input type="time" id="newEndTime" class="flex-grow bg-gray-700 text-white p-2 rounded-md">
+                </div>
+                <div>
+                    <label class="text-white block mb-2">Days:</label>
+                    <div class="flex flex-wrap gap-2 text-white text-sm">
+                        <label><input type="checkbox" class="new-event-day" value="1"> Mon</label>
+                        <label><input type="checkbox" class="new-event-day" value="2"> Tue</label>
+                        <label><input type="checkbox" class="new-event-day" value="3"> Wed</label>
+                        <label><input type="checkbox" class="new-event-day" value="4"> Thu</label>
+                        <label><input type="checkbox" class="new-event-day" value="5"> Fri</label>
+                        <label><input type="checkbox" class="new-event-day" value="6"> Sat</label>
+                        <label><input type="checkbox" class="new-event-day" value="0"> Sun</label>
+                    </div>
+                </div>
+                <button id="addUpdateScheduleEvent" class="bg-accent-color text-white p-3 rounded-md hover:bg-green-600 transition-colors">Add Event</button>
+                <button id="cancelEditScheduleEvent" class="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors hidden">Cancel Edit</button>
+            </div>
         </div>
     </div>
 
@@ -434,7 +822,7 @@
     <button id="settings-button" aria-label="Toggle Settings">⚙️</button>
 
     <!-- Build Info -->
-    <div id="build-info">build v3.0 (beta) by FebruaryKid</div>
+    <div id="build-info">build v3.5 (alpha) by FebruaryKid</div>
 
     <script>
         // Define color schemes
@@ -448,8 +836,7 @@
                 '--text-color': '#ffffff',
                 '--glass-bg': 'rgba(8, 6, 7, 0.4)',
                 '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
-                '--border-animation-color': '#ff00ff'
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
             },
             blue: {
                 '--primary-color': '#1a202c',
@@ -460,8 +847,7 @@
                 '--text-color': '#ffffff',
                 '--glass-bg': 'rgba(26, 32, 44, 0.4)',
                 '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
-                '--border-animation-color': '#00ffff'
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
             },
             green: {
                 '--primary-color': '#102e1c',
@@ -472,8 +858,7 @@
                 '--text-color': '#ffffff',
                 '--glass-bg': 'rgba(16, 46, 28, 0.4)',
                 '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
-                '--border-animation-color': '#00ff00'
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
             },
             red: {
                 '--primary-color': '#3a0f1f',
@@ -484,8 +869,7 @@
                 '--text-color': '#ffffff',
                 '--glass-bg': 'rgba(58, 15, 31, 0.4)',
                 '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
-                '--border-animation-color': '#ff0000'
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
             },
             purple: {
                 '--primary-color': '#2a0a3a',
@@ -496,54 +880,231 @@
                 '--text-color': '#ffffff',
                 '--glass-bg': 'rgba(42, 10, 58, 0.4)',
                 '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)',
-                '--border-animation-color': '#8a2be2'
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            orange: {
+                '--primary-color': '#4a2c0a',
+                '--secondary-color': '#e66c00',
+                '--accent-color': '#ff9900',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(74, 44, 10, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            teal: {
+                '--primary-color': '#0a3a3a',
+                '--secondary-color': '#008080',
+                '--accent-color': '#00cccc',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(10, 58, 58, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            pink: {
+                '--primary-color': '#3a0a2a',
+                '--secondary-color': '#cc0066',
+                '--accent-color': '#ff3399',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(58, 10, 42, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            gold: {
+                '--primary-color': '#4a3a0a',
+                '--secondary-color': '#8b6b00',
+                '--accent-color': '#ffcc00',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(74, 58, 10, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            emerald: {
+                '--primary-color': '#0a3a1a',
+                '--secondary-color': '#008040',
+                '--accent-color': '#00cc66',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(10, 58, 26, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            indigo: {
+                '--primary-color': '#1a0a3a',
+                '--secondary-color': '#4b0082',
+                '--accent-color': '#8a2be2',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ffffff',
+                '--glass-bg': 'rgba(26, 10, 58, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            sunrise: {
+                '--primary-color': '#ff7e5f',
+                '--secondary-color': '#feb47b',
+                '--accent-color': '#ffc107',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#333333',
+                '--glass-bg': 'rgba(255, 126, 95, 0.4)',
+                '--grid-color': 'rgba(0, 0, 0, 0.03)',
+                '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
+            },
+            twilight: {
+                '--primary-color': '#2c3e50',
+                '--secondary-color': '#34495e',
+                '--accent-color': '#95a5a6',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#ecf0f1',
+                '--glass-bg': 'rgba(44, 62, 80, 0.4)',
+                '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+            },
+            mint: {
+                '--primary-color': '#a8e063',
+                '--secondary-color': '#56ab2f',
+                '--accent-color': '#388e3c',
+                '--warning-color': '#f59e0b',
+                '--danger-color': '#ef4444',
+                '--text-color': '#333333',
+                '--glass-bg': 'rgba(168, 224, 99, 0.4)',
+                '--grid-color': 'rgba(0, 0, 0, 0.03)',
+                '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
             }
         };
 
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-
-            document.getElementById('hours').textContent = hours;
-            document.getElementById('minutes').textContent = minutes;
-
-            const secondsSpan = document.getElementById('seconds');
-            // Apply pulse effect to seconds when it changes
-            if (secondsSpan.textContent !== seconds) {
-                secondsSpan.classList.remove('second-pulse'); // Remove to re-trigger animation
-                void secondsSpan.offsetWidth; // Trigger reflow
-                secondsSpan.classList.add('second-pulse');
+        // Define background themes
+        const backgroundThemes = {
+            default: {
+                '--background-gradient-start': 'var(--primary-color)',
+                '--background-gradient-end': 'var(--secondary-color)'
+            },
+            nebula: {
+                '--background-gradient-start': '#0f0c29',
+                '--background-gradient-end': '#302b63',
+                '--primary-color': '#0f0c29',
+                '--secondary-color': '#302b63',
+                '--accent-color': '#4CAF50',
+            },
+            cyberpunk: {
+                '--background-gradient-start': '#1a0a2a',
+                '--background-gradient-end': '#0a1a2a',
+                '--primary-color': '#1a0a2a',
+                '--secondary-color': '#0a1a2a',
+                '--accent-color': '#00ffff',
+            },
+            forest: {
+                '--background-gradient-start': '#0a2a1a',
+                '--background-gradient-end': '#1a0a0a',
+                '--primary-color': '#0a2a1a',
+                '--secondary-color': '#1a0a0a',
+                '--accent-color': '#8BC34A',
+            },
+            ocean: {
+                '--background-gradient-start': '#000428',
+                '--background-gradient-end': '#004e92',
+                '--primary-color': '#000428',
+                '--secondary-color': '#004e92',
+                '--accent-color': '#42a5f5',
+            },
+            sunset: {
+                '--background-gradient-start': '#fdc830',
+                '--background-gradient-end': '#f37335',
+                '--primary-color': '#fdc830',
+                '--secondary-color': '#f37335',
+                '--accent-color': '#ff5722',
+            },
+            starlight: {
+                '--background-gradient-start': '#000000',
+                '--background-gradient-end': '#1a1a2e',
+                '--primary-color': '#000000',
+                '--secondary-color': '#1a1a2e',
+                '--accent-color': '#e0e0e0',
+                '--grid-color': 'rgba(255, 255, 255, 0.05)',
+            },
+            geometric: {
+                '--background-gradient-start': '#2c3e50',
+                '--background-gradient-end': '#34495e',
+                '--primary-color': '#2c3e50',
+                '--secondary-color': '#34495e',
+                '--accent-color': '#ecf0f1',
+                '--grid-color': 'rgba(255, 255, 255, 0.1)',
+            },
+            'abstract-waves': {
+                '--background-gradient-start': '#0f2027',
+                '--background-gradient-end': '#203a43',
+                '--primary-color': '#0f2027',
+                '--secondary-color': '#203a43',
+                '--accent-color': '#c4e0e5',
+                '--grid-color': 'rgba(255, 255, 255, 0.02)',
+                '--glass-bg': 'rgba(15, 32, 39, 0.4)',
+            },
+            'digital-matrix': {
+                '--background-gradient-start': '#000000',
+                '--background-gradient-end': '#001a00',
+                '--primary-color': '#000000',
+                '--secondary-color': '#001a00',
+                '--accent-color': '#00ff00',
+                '--grid-color': 'rgba(0, 255, 0, 0.05)',
+                '--glass-bg': 'rgba(0, 26, 0, 0.4)',
             }
-            secondsSpan.textContent = seconds;
+        };
 
+        // Define font families
+        const fontFamilies = {
+            'sf-mono': "'SF Mono', Monaco, 'Cascadia Code', monospace",
+            'digital-7': "'Digital-7', sans-serif",
+            'share-tech-mono': "'Share Tech Mono', monospace",
+            'vt323': "'VT323', monospace",
+            'press-start-2p': "'Press Start 2P', cursive",
+            'monoton': "'Monoton', cursive",
+            'bungee': "'Bungee', cursive",
+            'space-mono': "'Space Mono', monospace",
+            'cutive-mono': "'Cutive Mono', monospace"
+        };
 
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-            const dayName = days[now.getDay()];
-            const monthName = months[now.getMonth()];
-            const day = now.getDate();
-            const year = now.getFullYear();
-
-            const dateString = `${dayName}, ${monthName} ${day}, ${year}`;
-            document.getElementById('date-text').textContent = dateString;
-        }
-
-        function applyColorScheme(schemeName) {
-            const scheme = colorSchemes[schemeName];
-            if (scheme) {
-                for (const [prop, value] of Object.entries(scheme)) {
-                    root.style.setProperty(prop, value);
-                }
-            }
-        }
+        // Define date formatters
+        const dateFormatters = {
+            'full': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz
+            }).format(date),
+            'short-mdy': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                month: '2-digit', day: '2-digit', year: 'numeric', timeZone: tz
+            }).format(date),
+            'short-dmy': (date, tz) => new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit', month: '2-digit', year: 'numeric', timeZone: tz
+            }).format(date),
+            'iso': (date, tz) => new Intl.DateTimeFormat('en-CA', {
+                year: 'numeric', month: '2-digit', day: '2-digit', timeZone: tz
+            }).format(date),
+            'long-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
+            }).format(date),
+            'short-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                month: '2-digit', day: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz
+            }).format(date),
+            'day-month': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                day: 'numeric', month: 'long', timeZone: tz
+            }).format(date),
+            'day-month-year': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                day: 'numeric', month: 'long', year: 'numeric', timeZone: tz
+            }).format(date),
+            'time-only': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
+            }).format(date)
+        };
 
         // Get references to elements
         const root = document.documentElement;
@@ -552,18 +1113,247 @@
         const controlsDiv = document.getElementById('controls');
         const settingsButton = document.getElementById('settings-button');
         const colorSchemeSelect = document.getElementById('colorSchemeSelect');
+        const backgroundThemeSelect = document.getElementById('backgroundThemeSelect');
+        const clockFontSelect = document.getElementById('clockFontSelect');
+        const dateFormatSelect = document.getElementById('dateFormatSelect');
+        const timeZoneSelect = document.getElementById('timeZoneSelect');
+        const onAirToggle = document.getElementById('onAirToggle');
+        const onAirIndicator = document.getElementById('on-air-indicator');
+        const secondHand = document.getElementById('second-hand');
 
-        // Event listener for layout scale slider
+        // Schedule modal elements
+        const scheduleModal = document.getElementById('schedule-modal');
+        const openScheduleModalBtn = document.getElementById('openScheduleModal');
+        const closeScheduleModalBtn = document.getElementById('close-schedule-modal');
+        const onAirScheduleToggle = document.getElementById('onAirScheduleToggle');
+        const scheduleList = document.getElementById('schedule-list');
+        const newStartTimeInput = document.getElementById('newStartTime');
+        const newEndTimeInput = document.getElementById('newEndTime');
+        const newEventDayCheckboxes = document.querySelectorAll('.new-event-day');
+        const addUpdateScheduleEventBtn = document.getElementById('addUpdateScheduleEvent');
+        const cancelEditScheduleEventBtn = document.getElementById('cancelEditScheduleEvent');
+
+        // Global variable to track if we are editing an event
+        let editingScheduleIndex = null;
+
+        // Initial schedule with default events
+        // Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        let onAirSchedule = [
+            { startTime: '07:50', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // Mon-Fri
+            { startTime: '21:00', endTime: '22:30', days: [1] },  // Monday only
+            { startTime: '20:00', endTime: '21:30', days: [4] }   // Thursday only
+        ];
+
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        function renderSchedule() {
+            scheduleList.innerHTML = ''; // Clear existing list
+            if (onAirSchedule.length === 0) {
+                scheduleList.innerHTML = '<p class="text-center text-gray-400">No scheduled events.</p>';
+                return;
+            }
+            onAirSchedule.forEach((event, index) => {
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('schedule-entry');
+
+                const daysText = event.days.length === 7 ? 'Every Day' :
+                                 event.days.length === 5 && event.days.every(d => d >= 1 && d <= 5) ? 'Weekdays' :
+                                 event.days.map(day => dayNames[day]).join(', ');
+
+                entryDiv.innerHTML = `
+                    <div>
+                        <p class="text-lg">${event.startTime} - ${event.endTime}</p>
+                        <p class="days">${daysText}</p>
+                    </div>
+                    <div>
+                        <button class="edit-btn" data-index="${index}">Edit</button>
+                        <button data-index="${index}">Delete</button>
+                    </div>
+                `;
+                scheduleList.appendChild(entryDiv);
+            });
+
+            // Add event listeners to delete buttons
+            scheduleList.querySelectorAll('.schedule-entry button:last-child').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const indexToDelete = parseInt(event.target.dataset.index);
+                    onAirSchedule.splice(indexToDelete, 1);
+                    renderSchedule();
+                    updateClock(); // Re-evaluate ON AIR status
+                });
+            });
+
+            // Add event listeners to edit buttons
+            scheduleList.querySelectorAll('.schedule-entry .edit-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    editingScheduleIndex = parseInt(event.target.dataset.index);
+                    const eventToEdit = onAirSchedule[editingScheduleIndex];
+
+                    newStartTimeInput.value = eventToEdit.startTime;
+                    newEndTimeInput.value = eventToEdit.endTime;
+                    newEventDayCheckboxes.forEach(checkbox => {
+                        checkbox.checked = eventToEdit.days.includes(parseInt(checkbox.value));
+                    });
+
+                    addUpdateScheduleEventBtn.textContent = 'Update Event';
+                    cancelEditScheduleEventBtn.classList.remove('hidden');
+                });
+            });
+        }
+
+        function clearNewEventForm() {
+            newStartTimeInput.value = '';
+            newEndTimeInput.value = '';
+            newEventDayCheckboxes.forEach(checkbox => checkbox.checked = false);
+            addUpdateScheduleEventBtn.textContent = 'Add Event';
+            cancelEditScheduleEventBtn.classList.add('hidden');
+            editingScheduleIndex = null;
+        }
+
+        function addUpdateScheduleEntry() {
+            const newStartTime = newStartTimeInput.value;
+            const newEndTime = newEndTimeInput.value;
+            const newDays = Array.from(newEventDayCheckboxes)
+                                .filter(checkbox => checkbox.checked)
+                                .map(checkbox => parseInt(checkbox.value));
+
+            if (newStartTime && newEndTime && newDays.length > 0) {
+                if (editingScheduleIndex !== null) {
+                    // Update existing event
+                    onAirSchedule[editingScheduleIndex] = { startTime: newStartTime, endTime: newEndTime, days: newDays };
+                } else {
+                    // Add new event
+                    onAirSchedule.push({ startTime: newStartTime, endTime: newEndTime, days: newDays });
+                }
+                renderSchedule();
+                updateClock(); // Re-evaluate ON AIR status
+                clearNewEventForm(); // Clear inputs and reset button
+            } else {
+                console.warn('Please fill in all fields for the schedule event.');
+            }
+        }
+
+        function updateClock() {
+            const selectedTimeZone = timeZoneSelect.value;
+            const now = new Date();
+
+            // Time formatting
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: selectedTimeZone
+            };
+            const timeFormatter = new Intl.DateTimeFormat('en-US', timeOptions);
+            const parts = timeFormatter.formatToParts(now);
+
+            let hours = parts.find(p => p.type === 'hour').value;
+            let minutes = parts.find(p => p.type === 'minute').value;
+            let seconds = parts.find(p => p.type === 'second').value;
+
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+
+            const secondsSpan = document.getElementById('seconds');
+            if (secondsSpan.textContent !== seconds) {
+                secondsSpan.classList.remove('second-pulse');
+                void secondsSpan.offsetWidth;
+                secondsSpan.classList.add('second-pulse');
+            }
+            secondsSpan.textContent = seconds;
+
+            // Date formatting
+            const selectedDateFormat = dateFormatSelect.value;
+            const dateString = dateFormatters[selectedDateFormat](now, selectedTimeZone);
+            document.getElementById('date-text').textContent = dateString;
+
+            // Update Second Hand (Analog Style)
+            const secondAngle = (parseInt(seconds) / 60) * 360;
+            secondHand.style.transform = `translateX(-50%) translateY(-100%) rotate(${secondAngle}deg)`;
+
+            // ON AIR indicator logic
+            const currentLocalTime = new Date(now.toLocaleString('en-US', { timeZone: selectedTimeZone }));
+            const currentHour = currentLocalTime.getHours();
+            const currentMinute = currentLocalTime.getMinutes();
+            const currentDay = currentLocalTime.getDay();
+
+            let isScheduledOnAir = false;
+            if (onAirScheduleToggle.checked) {
+                for (const event of onAirSchedule) {
+                    const [startHour, startMinute] = event.startTime.split(':').map(Number);
+                    const [endHour, endMinute] = event.endTime.split(':').map(Number);
+
+                    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+                    const startTimeInMinutes = startHour * 60 + startMinute;
+                    const endTimeInMinutes = endHour * 60 + endMinute;
+
+                    let isTimeMatch = false;
+                    if (startTimeInMinutes <= endTimeInMinutes) {
+                        isTimeMatch = currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
+                    } else {
+                        isTimeMatch = currentTimeInMinutes >= startTimeInMinutes || currentTimeInMinutes < endTimeInMinutes;
+                    }
+
+                    const isDayMatch = event.days.includes(currentDay);
+
+                    if (isTimeMatch && isDayMatch) {
+                        isScheduledOnAir = true;
+                        break;
+                    }
+                }
+            }
+
+            const isOnAir = onAirToggle.checked || isScheduledOnAir;
+
+            if (isOnAir) {
+                onAirIndicator.style.display = 'block';
+                onAirIndicator.classList.add('blinking');
+            } else {
+                onAirIndicator.style.display = 'none';
+                onAirIndicator.classList.remove('blinking');
+            }
+        }
+
+        function applyColorScheme(schemeName) {
+            const scheme = colorSchemes[schemeName];
+            if (scheme) {
+                for (const [prop, value] of Object.entries(scheme)) {
+                    root.style.setProperty(prop, value);
+                }
+                applyBackgroundTheme(backgroundThemeSelect.value);
+            }
+        }
+
+        function applyBackgroundTheme(themeName) {
+            const theme = backgroundThemes[themeName];
+            if (theme) {
+                for (const [prop, value] of Object.entries(theme)) {
+                    root.style.setProperty(prop, value);
+                }
+            }
+        }
+
+        function applyClockFont(fontName) {
+            const font = fontFamilies[fontName];
+            if (font) {
+                root.style.setProperty('--clock-font-family', font);
+            }
+        }
+
+        // Event listeners
         layoutScaleSlider.addEventListener('input', (event) => {
-            root.style.setProperty('--layout-scale-factor', event.target.value);
+            const layoutScale = parseFloat(event.target.value);
+            root.style.setProperty('--layout-scale-factor', layoutScale);
+            const currentFontSliderValue = parseFloat(fontScaleSlider.value);
+            root.style.setProperty('--font-scale-factor', currentFontSliderValue);
         });
 
-        // Event listener for font scale slider
         fontScaleSlider.addEventListener('input', (event) => {
-            root.style.setProperty('--font-scale-factor', event.target.value);
+            const fontScale = parseFloat(event.target.value);
+            root.style.setProperty('--font-scale-factor', fontScale);
         });
 
-        // Event listener for settings button to toggle controls visibility
         settingsButton.addEventListener('click', () => {
             if (controlsDiv.style.opacity === '0' || controlsDiv.style.opacity === '') {
                 controlsDiv.style.opacity = '1';
@@ -574,12 +1364,48 @@
             }
         });
 
-        // Event listener for color scheme select
         colorSchemeSelect.addEventListener('change', (event) => {
             applyColorScheme(event.target.value);
         });
 
-        // Initial call and set interval for updates
+        backgroundThemeSelect.addEventListener('change', (event) => {
+            applyBackgroundTheme(event.target.value);
+        });
+
+        clockFontSelect.addEventListener('change', (event) => {
+            applyClockFont(event.target.value);
+        });
+
+        dateFormatSelect.addEventListener('change', updateClock);
+        timeZoneSelect.addEventListener('change', updateClock);
+        onAirToggle.addEventListener('change', updateClock);
+
+        // Schedule Modal Event Listeners
+        openScheduleModalBtn.addEventListener('click', () => {
+            scheduleModal.classList.remove('hidden');
+            renderSchedule();
+        });
+
+        closeScheduleModalBtn.addEventListener('click', () => {
+            scheduleModal.classList.add('hidden');
+            clearNewEventForm(); // Clear form when closing modal
+        });
+
+        onAirScheduleToggle.addEventListener('change', updateClock);
+        addUpdateScheduleEventBtn.addEventListener('click', addUpdateScheduleEntry);
+        cancelEditScheduleEventBtn.addEventListener('click', clearNewEventForm);
+
+
+        newEventDayCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateClock);
+        });
+
+        // Initial calls and set interval for updates
+        // Apply default settings on load
+        applyColorScheme(backgroundThemeSelect.value); // Apply Digital Matrix theme by default
+        applyBackgroundTheme(backgroundThemeSelect.value);
+        applyClockFont(clockFontSelect.value);
+
         updateClock();
         setInterval(updateClock, 1000);
     </script>
