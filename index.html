@@ -166,16 +166,17 @@
 
         #clock-circle {
             position: relative;
-            width: calc(var(--base-clock-circle-width) * var(--layout-scale-factor));
-            height: calc(var(--base-clock-circle-height) * var(--layout-scale-factor));
-            max-width: calc(70vh * var(--layout-scale-factor));
-            max-height: calc(70vh * var(--layout-scale-factor));
+            /* Use min(vw, vh) to ensure it's always a circle and scales responsively */
+            width: calc(min(80vw, 80vh) * var(--layout-scale-factor));
+            height: calc(min(80vw, 80vh) * var(--layout-scale-factor));
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            /* Add aspect-ratio for explicit circularity */
+            aspect-ratio: 1 / 1;
         }
 
         /* Progress Bar Styles */
@@ -277,7 +278,7 @@
             top: 50%;
             left: 50%;
             width: 2px;
-            height: 40%;
+            height: 40%; /* Adjusted to be shorter */
             background-color: var(--accent-color);
             transform-origin: bottom center;
             transform: translateX(-50%) translateY(-100%) rotate(0deg);
@@ -300,6 +301,39 @@
             border: 1px solid var(--accent-color);
             box-shadow: 0 0 5px var(--text-color);
         }
+
+        /* Analog Seconds Dots */
+        #analog-seconds-dots {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the container */
+            width: 100%; /* Take full width of clock-circle */
+            height: 100%; /* Take full height of clock-circle */
+            pointer-events: none; /* Allow clicks to pass through */
+            z-index: 1; /* Above analog hand, below text */
+        }
+
+        .analog-second-dot {
+            position: absolute;
+            width: 6px; /* Size of the dot */
+            height: 6px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 3px var(--accent-color);
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.1s ease-out, transform 0.3s ease-out; /* Smooth transition for appearing/disappearing */
+        }
+
+        .analog-second-dot.visible {
+            opacity: 1;
+        }
+
+        .analog-second-dot.disappearing {
+            opacity: 0;
+            transform: scale(0);
+        }
+
 
         #bouncing-dot {
             position: absolute;
@@ -389,15 +423,15 @@
         /* Comet Second Hand Style */
         #comet-second-hand {
             position: absolute;
-            width: 80px; /* Length of the comet */
-            height: 15px; /* Width of the comet */
-            /* Radial gradient to simulate head and fading tail */
-            background: radial-gradient(circle at 10% 50%, var(--accent-color) 0%, rgba(var(--accent-color), 0.8) 20%, transparent 100%);
-            border-radius: 50%; /* Make it an ellipse */
-            filter: blur(3px); /* Blurry effect for the tail */
-            box-shadow: 0 0 15px var(--accent-color); /* Glow effect */
+            width: 100px; /* Length of the comet */
+            height: 10px; /* Width of the comet */
+            /* Linear gradient for the tail effect, from solid to transparent */
+            background: linear-gradient(to right, var(--accent-color) 0%, rgba(var(--accent-color), 0.8) 30%, transparent 100%);
+            border-radius: 5px; /* Rounded ends for the shape */
+            filter: blur(2px); /* Subtle blur for the tail */
+            box-shadow: 0 0 10px var(--accent-color), 0 0 20px rgba(var(--accent-color), 0.5); /* Stronger glow */
             z-index: 2;
-            transform-origin: 10% 50%; /* Pivot point is at the "head" of the comet */
+            transform-origin: 0% 50%; /* Pivot point is at the "head" of the comet */
         }
 
 
@@ -498,6 +532,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative; /* Establish stacking context for children */
+            z-index: 1; /* Ensure control groups stack above main panel if needed, but below select options */
         }
 
         #controls label {
@@ -519,6 +555,8 @@
             cursor: pointer;
             outline: none;
             transition: all 0.2s ease-in-out;
+            position: relative; /* Ensure z-index works */
+            z-index: 20; /* Higher z-index to appear above other elements */
         }
 
         #controls select:focus,
@@ -852,6 +890,11 @@
                 <!-- Second Hand (Analog Style) -->
                 <div id="second-hand-analog" class="second-hand-element"></div>
 
+                <!-- Analog Seconds Dots -->
+                <div id="analog-seconds-dots" class="second-hand-element">
+                    <!-- 60 dot elements will be generated here by JS -->
+                </div>
+
                 <!-- Bouncing Dot Second Hand -->
                 <div id="bouncing-dot" class="second-hand-element"></div>
 
@@ -1080,6 +1123,12 @@
         // Global or module-level variable for bouncing tail dot history
         let bouncingTailDotPositions = [];
         const BOUNCING_TAIL_HISTORY_LENGTH = 4; // Main dot + 3 tail dots
+
+        // Global variable for analog seconds dots
+        let analogSecondDotsElements = [];
+        // Adjusted to match the new analog hand length
+        const ANALOG_DOT_RADIUS_PERCENT = 40; // Distance from center for the dots (percentage of clock-circle radius)
+        const ANALOG_DOT_SIZE_PX = 6; // Size of the dot in pixels
 
         document.addEventListener('DOMContentLoaded', () => {
             // Define color schemes
@@ -1388,6 +1437,7 @@
             // Second hand style elements
             const secondHandStyleSelect = document.getElementById('secondHandStyleSelect');
             const secondHandAnalog = document.getElementById('second-hand-analog');
+            const analogSecondsDotsContainer = document.getElementById('analog-seconds-dots'); // Container for analog dots
             const bouncingDot = document.getElementById('bouncing-dot');
             const pulsingGlowContainer = document.getElementById('pulsing-glow-container');
             const pulsingGlowText = document.getElementById('pulsing-glow-text');
@@ -1419,6 +1469,23 @@
             ];
 
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Initialize analog dots (pre-create 60 elements)
+            for (let i = 0; i < 60; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('analog-second-dot');
+                // Calculate static position for each dot
+                // Angle for each second, starting from top (0 degrees at 12 o'clock)
+                const angleRad = (i / 60) * 2 * Math.PI - Math.PI / 2;
+                const x = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.cos(angleRad); // Percentage X
+                const y = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.sin(angleRad); // Percentage Y
+
+                dot.style.left = `calc(${x}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
+                dot.style.top = `calc(${y}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
+                analogSecondsDotsContainer.appendChild(dot);
+                analogSecondDotsElements.push(dot);
+            }
+
 
             function renderSchedule() {
                 scheduleList.innerHTML = ''; // Clear existing list
@@ -1623,13 +1690,51 @@
                     bouncingTailDotPositions = [];
                 }
 
+                // Reset analog seconds dots when style changes
+                if (selectedSecondHandStyle !== 'analog-hand') {
+                    analogSecondDotsElements.forEach(dot => {
+                        dot.classList.remove('visible', 'disappearing'); // Reset classes
+                        dot.style.opacity = '0'; // Ensure opacity is reset for next cycle
+                        dot.style.transform = 'scale(1)'; // Ensure scale is reset
+                    });
+                }
+
+
                 if (selectedSecondHandStyle === 'analog-hand') {
                     secondHandAnalog.style.display = 'block';
                     const secondAngle = (parseInt(seconds) / 60) * 360;
                     secondHandAnalog.style.transform = `translateX(-50%) translateY(-100%) rotate(${secondAngle}deg)`;
+
+                    analogSecondsDotsContainer.style.display = 'block';
+
+                    // Make the current second's dot visible
+                    const currentSecondInt = parseInt(seconds);
+                    if (analogSecondDotsElements[currentSecondInt]) {
+                        // Only add 'visible' if it's not already there to avoid re-triggering transition
+                        if (!analogSecondDotsElements[currentSecondInt].classList.contains('visible')) {
+                            analogSecondDotsElements[currentSecondInt].classList.add('visible');
+                        }
+                    }
+
+                    // Disappearance animation for dots when seconds reset
+                    if (currentSecondInt === 0) {
+                        // Trigger disappearance for all dots from the previous cycle
+                        analogSecondDotsElements.forEach(dot => {
+                            if (dot.classList.contains('visible')) {
+                                dot.classList.add('disappearing');
+                                dot.classList.remove('visible'); // Remove visible class immediately
+                                // Remove disappearing class after animation to reset for next cycle
+                                dot.addEventListener('transitionend', function handler() {
+                                    dot.classList.remove('disappearing');
+                                    dot.removeEventListener('transitionend', handler);
+                                }, { once: true });
+                            }
+                        });
+                    }
                 } else if (selectedSecondHandStyle === 'bouncing-dot') {
                     bouncingDot.style.display = 'block';
-                    const radius = 45;
+                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
+                    const radius = ANALOG_DOT_RADIUS_PERCENT;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
@@ -1643,7 +1748,8 @@
                     pulsingGlowText.style.animation = 'pulse-glow 1s infinite alternate';
                 } else if (selectedSecondHandStyle === 'bouncing-tail-dot') {
                     bouncingTailDotContainer.style.display = 'block';
-                    const radius = 45;
+                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
+                    const radius = ANALOG_DOT_RADIUS_PERCENT;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
@@ -1652,10 +1758,14 @@
                     const currentMainX = centerX + radius * Math.sin(angleRad);
                     const currentMainY = centerY - radius * Math.cos(angleRad);
 
-                    // Add current position to history
-                    bouncingTailDotPositions.unshift({ x: currentMainX, y: currentMainY }); // Add to front
-                    if (bouncingTailDotPositions.length > BOUNCING_TAIL_HISTORY_LENGTH) {
-                        bouncingTailDotPositions.pop(); // Remove oldest if history too long
+                    // Add current position to history only if it's different from the last recorded position
+                    // This prevents adding duplicate positions if the clock updates faster than seconds change
+                    const lastPos = bouncingTailDotPositions[0];
+                    if (!lastPos || lastPos.x !== currentMainX || lastPos.y !== currentMainY) {
+                        bouncingTailDotPositions.unshift({ x: currentMainX, y: currentMainY }); // Add to front
+                        if (bouncingTailDotPositions.length > BOUNCING_TAIL_HISTORY_LENGTH) {
+                            bouncingTailDotPositions.pop(); // Remove oldest if history too long
+                        }
                     }
 
                     const dotElements = document.querySelectorAll('#bouncing-tail-dot-container .bouncing-tail-dot-segment');
@@ -1671,7 +1781,7 @@
                             segment.style.opacity = 1 - (index * 0.2); // Fade out tail dots
                             segment.style.display = 'block';
                         } else {
-                            segment.style.display = 'none'; // Hide if no history for this tail dot
+                            segment.style.display = 'none'; // Hide if no history for this tail dot (e.g., at start)
                         }
                     });
                 } else if (selectedSecondHandStyle === 'comet') {
@@ -1681,15 +1791,21 @@
                     const centerY = 50;
                     const secondAngle = (parseInt(seconds) / 60) * 360; // Angle in degrees
 
-                    // Position the center of the comet element on the circle's path
-                    const elementCenterOffset = 40; // Half of comet's width (80px / 2)
-                    const elementHeightOffset = 7.5; // Half of comet's height (15px / 2)
+                    // Position the center of the comet element's head on the circle's path
+                    // The transform-origin is 0% 50%, so we position the element's top-left corner
+                    // such that its origin is at the desired point on the circle.
+                    const cometWidth = 100; // Matches CSS width
+                    const cometHeight = 10; // Matches CSS height
 
-                    const posX = centerX + radius * Math.sin(secondAngle * Math.PI / 180);
-                    const posY = centerY - radius * Math.cos(secondAngle * Math.PI / 180);
+                    const angleRad = secondAngle * Math.PI / 180;
+                    const headX = centerX + radius * Math.sin(angleRad);
+                    const headY = centerY - radius * Math.cos(angleRad);
 
-                    cometSecondHand.style.left = `calc(${posX}% - ${elementCenterOffset}px)`;
-                    cometSecondHand.style.top = `calc(${posY}% - ${elementHeightOffset}px)`;
+                    // Adjust for the comet's own dimensions and its transform-origin
+                    // The 'left' position needs to be `headX` (center of clock) - `radius` (distance to head)
+                    // The 'top' position needs to be `headY` (center of clock) - `half of comet's height`
+                    cometSecondHand.style.left = `calc(${headX}% - ${cometWidth * (0/100)}px)`; // 0% origin, so no X offset from headX
+                    cometSecondHand.style.top = `calc(${headY}% - ${cometHeight / 2}px)`; // Half of height for vertical centering
 
                     // Rotate the comet so its tail trails behind.
                     // Adding 90 degrees aligns the element's horizontal axis with the tangent of the circle.
