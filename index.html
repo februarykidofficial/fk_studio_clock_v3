@@ -31,6 +31,7 @@
             --text-shadow-color: rgba(0, 255, 0, 1); /* Green glow for digital matrix */
             --text-shadow-intensity: 70px;
             --grid-color: rgba(0, 255, 0, 0.05); /* Green grid */
+            --progress-bar-color: var(--accent-color); /* Default progress bar color */
 
             /* Background Themes */
             --background-gradient-start: var(--primary-color);
@@ -78,6 +79,11 @@
             align-items: center;
             cursor: default;
             position: relative;
+        }
+
+        /* SVG Glow Filter */
+        .glow-filter {
+            filter: drop-shadow(0 0 5px var(--progress-bar-color)) drop-shadow(0 0 10px var(--progress-bar-color)) drop-shadow(0 0 15px var(--progress-bar-color));
         }
 
         /* Background decoration */
@@ -172,6 +178,55 @@
             padding: 20px;
         }
 
+        /* Progress Bar Styles */
+        /* Minute Bar Progress Bar */
+        #minute-bar-progress-container {
+            position: absolute;
+            bottom: 20px; /* Position at the bottom of the main panel */
+            left: 10%; /* Start from left */
+            width: 80%; /* Total width */
+            height: 10px;
+            z-index: 2;
+            display: none; /* Hidden by default */
+            overflow: hidden; /* Clip the rect if it goes beyond 100% */
+            border-radius: 5px; /* Match rect border-radius */
+            background-color: rgba(255, 255, 255, 0.1); /* Background for the progress bar track */
+            filter: url(#glowFilter); /* Apply glow filter to the container */
+        }
+
+        #minute-bar-progress-rect {
+            fill: var(--progress-bar-color); /* Change to fill for a solid bar */
+            stroke: none; /* Remove stroke if it's a filled bar */
+            height: 100%;
+            width: 0%; /* Start at 0% width */
+            transition: width 0.5s linear;
+            border-radius: 5px; /* Rounded corners for the filled bar */
+        }
+
+        /* Hour Segment Progress Bar */
+        #hour-segment-progress-container {
+            position: absolute;
+            bottom: 20px;
+            left: 10%;
+            width: 80%;
+            height: 15px;
+            z-index: 2;
+            display: none;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            filter: url(#glowFilter);
+        }
+
+        #hour-segment-progress-rect {
+            fill: var(--progress-bar-color);
+            stroke: none;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s linear;
+            border-radius: 8px;
+        }
+
         #clock-text {
             font-family: var(--clock-font-family);
             font-weight: 400;
@@ -206,13 +261,18 @@
         }
 
         @keyframes pulse-second {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
         }
 
-        /* Second Hand (Analog Style) */
-        #second-hand {
+        /* Second Hand Styles */
+        /* Base class for all second hand elements for easy hiding */
+        .second-hand-element {
+            display: none; /* Hidden by default, controlled by JS */
+        }
+
+        #second-hand-analog {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -227,8 +287,7 @@
             transition: transform 0.1s linear;
         }
 
-        /* Small circle at the center of the second hand */
-        #second-hand::after {
+        #second-hand-analog::after {
             content: '';
             position: absolute;
             bottom: -5px;
@@ -241,6 +300,106 @@
             border: 1px solid var(--accent-color);
             box-shadow: 0 0 5px var(--text-color);
         }
+
+        #bouncing-dot {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
+            z-index: 2; /* Above clock text */
+            transform-origin: 50% 50%; /* For rotation around its own center */
+        }
+
+        #pulsing-glow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 0; /* Behind clock text */
+        }
+
+        #pulsing-glow-text {
+            font-family: var(--clock-font-family);
+            font-weight: 400;
+            font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            color: transparent; /* Text color is transparent, only shadow is visible */
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
+            letter-spacing: 0.1em;
+            text-align: center;
+            opacity: 0; /* Hidden by default */
+            animation: none; /* Controlled by JS */
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--text-shadow-color); }
+            50% { opacity: 1; text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color); }
+            100% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--text-shadow-color); }
+        }
+
+        /* Bouncing Tail Dot Style */
+        #bouncing-tail-dot-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the container */
+            width: 100%; /* Take full width of clock-circle */
+            height: 100%; /* Take full height of clock-circle */
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        .bouncing-tail-dot-segment {
+            position: absolute;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
+            z-index: 2; /* Above clock text */
+            transition: left 0.1s linear, top 0.1s linear, width 0.1s linear, height 0.1s linear, opacity 0.1s linear;
+        }
+
+        /* Individual dot sizes and opacities (adjusted by JS for tail effect) */
+        .main-dot {
+            width: 15px;
+            height: 15px;
+        }
+
+        .tail-dot-1 {
+            width: 12px;
+            height: 12px;
+            opacity: 0.6;
+        }
+
+        .tail-dot-2 {
+            width: 9px;
+            height: 9px;
+            opacity: 0.4;
+        }
+
+        .tail-dot-3 {
+            width: 6px;
+            height: 6px;
+            opacity: 0.2;
+        }
+
+        /* Comet Second Hand Style */
+        #comet-second-hand {
+            position: absolute;
+            width: 80px; /* Length of the comet */
+            height: 15px; /* Width of the comet */
+            /* Radial gradient to simulate head and fading tail */
+            background: radial-gradient(circle at 10% 50%, var(--accent-color) 0%, rgba(var(--accent-color), 0.8) 20%, transparent 100%);
+            border-radius: 50%; /* Make it an ellipse */
+            filter: blur(3px); /* Blurry effect for the tail */
+            box-shadow: 0 0 15px var(--accent-color); /* Glow effect */
+            z-index: 2;
+            transform-origin: 10% 50%; /* Pivot point is at the "head" of the comet */
+        }
+
 
         #date-text {
             font-family: var(--date-font-family);
@@ -299,8 +458,8 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             z-index: 10;
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            flex-direction: column; /* Changed to column for sections */
+            gap: 20px; /* Gap between sections */
             align-items: center;
             color: var(--text-color);
             font-family: var(--control-font-family);
@@ -310,6 +469,29 @@
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
             max-width: 95%;
             justify-content: center;
+        }
+
+        .settings-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px; /* Gap within sections */
+            justify-content: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+
+        .settings-section-title {
+            width: 100%;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
         }
 
         .control-group {
@@ -584,6 +766,11 @@
                 bottom: 10px;
             }
 
+            .settings-section {
+                gap: 10px;
+                padding: 5px 0;
+            }
+
             #settings-button {
                 width: 40px;
                 height: 40px;
@@ -646,7 +833,6 @@
     </style>
 </head>
 <body>
-    <!-- Background decoration -->
     <div class="background-decoration"></div>
 
     <div class="main-panel">
@@ -664,114 +850,180 @@
                     <span id="seconds">00</span>
                 </div>
                 <!-- Second Hand (Analog Style) -->
-                <div id="second-hand"></div>
+                <div id="second-hand-analog" class="second-hand-element"></div>
+
+                <!-- Bouncing Dot Second Hand -->
+                <div id="bouncing-dot" class="second-hand-element"></div>
+
+                <!-- Pulsing Glow Second Hand -->
+                <div id="pulsing-glow-container" class="second-hand-element">
+                    <span id="pulsing-glow-text"></span>
+                </div>
+
+                <!-- Bouncing Tail Dot Second Hand -->
+                <div id="bouncing-tail-dot-container" class="second-hand-element">
+                    <div class="bouncing-tail-dot-segment main-dot"></div>
+                    <div class="bouncing-tail-dot-segment tail-dot-1"></div>
+                    <div class="bouncing-tail-dot-segment tail-dot-2"></div>
+                    <div class="bouncing-tail-dot-segment tail-dot-3"></div>
+                </div>
+
+                <!-- Comet Second Hand -->
+                <div id="comet-second-hand" class="second-hand-element"></div>
             </div>
         </div>
         <!-- Date text moved outside clock-circle for independent positioning -->
         <div id="date-text">January 1, 2024</div>
+
+        <!-- Hour Segment Progress Bar -->
+        <div id="hour-segment-progress-container">
+            <svg id="hour-segment-progress-svg" viewBox="0 0 100 15">
+                <rect id="hour-segment-progress-rect" x="0" y="0" height="15" rx="8" ry="8"></rect>
+            </svg>
+        </div>
+
+        <!-- Minute Bar Progress Bar -->
+        <div id="minute-bar-progress-container">
+            <svg id="minute-bar-progress-svg" viewBox="0 0 100 10">
+                <rect id="minute-bar-progress-rect" x="0" y="0" height="10" rx="5" ry="5"></rect>
+            </svg>
+        </div>
     </div>
 
     <!-- Controls for layout and font size -->
     <div id="controls">
-        <div class="control-group">
-            <label for="layoutScaleSlider">Layout Scale:</label>
-            <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+        <!-- Section 1: Clock Appearance -->
+        <div class="settings-section">
+            <div class="settings-section-title">Clock Appearance</div>
+            <div class="control-group">
+                <label for="clockFontSelect">Clock Font:</label>
+                <select id="clockFontSelect">
+                    <option value="sf-mono">SF Mono (Retro)</option>
+                    <option value="digital-7">Digital-7</option>
+                    <option value="share-tech-mono">Share Tech Mono</option>
+                    <option value="vt323">VT323</option>
+                    <option value="press-start-2p">Press Start 2P</option>
+                    <option value="monoton">Monoton</option>
+                    <option value="bungee">Bungee</option>
+                    <option value="space-mono">Space Mono</option>
+                    <option value="cutive-mono">Cutive Mono</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="dateFormatSelect">Date Format:</label>
+                <select id="dateFormatSelect">
+                    <option value="short-dmy">DD/MM/YYYY</option>
+                    <option value="full">Weekday, Month Day, Year</option>
+                    <option value="short-mdy">MM/DD/YYYY</option>
+                    <option value="iso">YYYY-MM-DD</option>
+                    <option value="long-date-time">Weekday, Month Day, Year, HH:MM:SS</option>
+                    <option value="short-date-time">MM/DD/YYYY HH:MM</option>
+                    <option value="day-month">Day Month</option>
+                    <option value="day-month-year">Day Month Year</option>
+                    <option value="time-only">Time Only</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="timeZoneSelect">Time Zone:</label>
+                <select id="timeZoneSelect">
+                    <option value="Europe/Warsaw">CET (Warsaw)</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">EST (New York)</option>
+                    <option value="America/Los_Angeles">PST (Los Angeles)</option>
+                    <option value="Europe/London">GMT (London)</option>
+                    <option value="Europe/Berlin">CET (Berlin)</option>
+                    <option value="Asia/Tokyo">JST (Tokyo)</option>
+                    <option value="Australia/Sydney">AEST (Sydney)</option>
+                </select>
+            </div>
         </div>
 
-        <div class="control-group">
-            <label for="fontScaleSlider">Font Scale:</label>
-            <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.0">
+        <!-- Section 2: Visuals & Progress -->
+        <div class="settings-section">
+            <div class="settings-section-title">Visuals & Progress</div>
+            <div class="control-group">
+                <label for="layoutScaleSlider">Layout Scale:</label>
+                <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+            </div>
+
+            <div class="control-group">
+                <label for="fontScaleSlider">Font Scale:</label>
+                <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label for="colorSchemeSelect">Color Scheme:</label>
+                <select id="colorSchemeSelect">
+                    <option value="zinc">Zinc (Default)</option>
+                    <option value="blue">Blue</option>
+                    <option value="green">Green</option>
+                    <option value="red">Red</option>
+                    <option value="purple">Purple</option>
+                    <option value="orange">Orange</option>
+                    <option value="teal">Teal</option>
+                    <option value="pink">Pink</option>
+                    <option value="gold">Gold</option>
+                    <option value="emerald">Emerald</option>
+                    <option value="indigo">Indigo</option>
+                    <option value="sunrise">Sunrise</option>
+                    <option value="twilight">Twilight</option>
+                    <option value="mint">Mint</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="backgroundThemeSelect">Background Theme:</label>
+                <select id="backgroundThemeSelect">
+                    <option value="digital-matrix">Digital Matrix</option>
+                    <option value="default">Default Gradient</option>
+                    <option value="nebula">Nebula</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="forest">Forest</option>
+                    <option value="ocean">Ocean Depths</option>
+                    <option value="sunset">Sunset Glow</option>
+                    <option value="starlight">Starlight</option>
+                    <option value="geometric">Geometric</option>
+                    <option value="abstract-waves">Abstract Waves</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="progressBarSelect">Progress Bar:</label>
+                <select id="progressBarSelect">
+                    <option value="none">None</option>
+                    <option value="minute-bar">Minute Bar</option>
+                    <option value="hour-segment">Hour Segment</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="secondHandStyleSelect">Second Hand Style:</label>
+                <select id="secondHandStyleSelect">
+                    <option value="none">None</option>
+                    <option value="analog-hand">Analog Hand</option>
+                    <option value="bouncing-dot">Bouncing Dot</option>
+                    <option value="pulsing-glow">Pulsing Glow</option>
+                    <option value="bouncing-tail-dot">Bouncing Tail Dot</option>
+                    <option value="comet">Comet</option>
+                </select>
+            </div>
         </div>
 
-        <div class="control-group">
-            <label for="colorSchemeSelect">Color Scheme:</label>
-            <select id="colorSchemeSelect">
-                <option value="zinc">Zinc (Default)</option>
-                <option value="blue">Blue</option>
-                <option value="green">Green</option>
-                <option value="red">Red</option>
-                <option value="purple">Purple</option>
-                <option value="orange">Orange</option>
-                <option value="teal">Teal</option>
-                <option value="pink">Pink</option>
-                <option value="gold">Gold</option>
-                <option value="emerald">Emerald</option>
-                <option value="indigo">Indigo</option>
-                <option value="sunrise">Sunrise</option>
-                <option value="twilight">Twilight</option>
-                <option value="mint">Mint</option>
-            </select>
-        </div>
+        <!-- Section 3: ON AIR Control -->
+        <div class="settings-section">
+            <div class="settings-section-title">ON AIR Control</div>
+            <div class="control-group flex items-center gap-2">
+                <label for="onAirToggle">ON AIR:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="onAirToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
 
-        <div class="control-group">
-            <label for="backgroundThemeSelect">Background Theme:</label>
-            <select id="backgroundThemeSelect">
-                <option value="default">Default Gradient</option>
-                <option value="nebula">Nebula</option>
-                <option value="cyberpunk">Cyberpunk</option>
-                <option value="forest">Forest</option>
-                <option value="ocean">Ocean Depths</option>
-                <option value="sunset">Sunset Glow</option>
-                <option value="starlight">Starlight</option>
-                <option value="geometric">Geometric</option>
-                <option value="abstract-waves">Abstract Waves</option>
-                <option value="digital-matrix">Digital Matrix</option>
-            </select>
+            <button id="openScheduleModal" class="bg-accent-color text-white p-2 rounded-md hover:bg-green-600 transition-colors">ON AIR Schedule</button>
         </div>
-
-        <div class="control-group">
-            <label for="clockFontSelect">Clock Font:</label>
-            <select id="clockFontSelect">
-                <option value="sf-mono">SF Mono (Retro)</option> <!-- Default changed -->
-                <option value="digital-7">Digital-7</option>
-                <option value="share-tech-mono">Share Tech Mono</option>
-                <option value="vt323">VT323</option>
-                <option value="press-start-2p">Press Start 2P</option>
-                <option value="monoton">Monoton</option>
-                <option value="bungee">Bungee</option>
-                <option value="space-mono">Space Mono</option>
-                <option value="cutive-mono">Cutive Mono</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="dateFormatSelect">Date Format:</label>
-            <select id="dateFormatSelect">
-                <option value="short-dmy">DD/MM/YYYY</option>         <!-- Default changed -->
-                <option value="full">Weekday, Month Day, Year</option>
-                <option value="short-mdy">MM/DD/YYYY</option>
-                <option value="iso">YYYY-MM-DD</option>
-                <option value="long-date-time">Weekday, Month Day, Year, HH:MM:SS</option>
-                <option value="short-date-time">MM/DD/YYYY HH:MM</option>
-                <option value="day-month">Day Month</option>
-                <option value="day-month-year">Day Month Year</option>
-                <option value="time-only">Time Only</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="timeZoneSelect">Time Zone:</label>
-            <select id="timeZoneSelect">
-                <option value="Europe/Warsaw">CET (Warsaw)</option> <!-- Default changed -->
-                <option value="UTC">UTC</option>
-                <option value="America/New_York">EST (New York)</option>
-                <option value="America/Los_Angeles">PST (Los Angeles)</option>
-                <option value="Europe/London">GMT (London)</option>
-                <option value="Europe/Berlin">CET (Berlin)</option>
-                <option value="Asia/Tokyo">JST (Tokyo)</option>
-                <option value="Australia/Sydney">AEST (Sydney)</option>
-            </select>
-        </div>
-
-        <div class="control-group flex items-center gap-2">
-            <label for="onAirToggle">Manual ON AIR:</label>
-            <label class="toggle-switch">
-                <input type="checkbox" id="onAirToggle">
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-
-        <button id="openScheduleModal" class="bg-accent-color text-white p-2 rounded-md hover:bg-green-600 transition-colors">Manage ON AIR Schedule</button>
     </div>
 
     <!-- Schedule Modal -->
@@ -822,592 +1074,740 @@
     <button id="settings-button" aria-label="Toggle Settings">⚙️</button>
 
     <!-- Build Info -->
-    <div id="build-info">build v3.5 (alpha) by FebruaryKid</div>
+    <div id="build-info">build v3.9 (alpha) by FebruaryKid</div>
 
     <script>
-        // Define color schemes
-        const colorSchemes = {
-            zinc: {
-                '--primary-color': '#52525b',
-                '--secondary-color': '#18181b',
-                '--accent-color': '#71717a',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(8, 6, 7, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            blue: {
-                '--primary-color': '#1a202c',
-                '--secondary-color': '#2b6cb0',
-                '--accent-color': '#4299e1',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(26, 32, 44, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            green: {
-                '--primary-color': '#102e1c',
-                '--secondary-color': '#2f855a',
-                '--accent-color': '#48bb78',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(16, 46, 28, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            red: {
-                '--primary-color': '#3a0f1f',
-                '--secondary-color': '#c53030',
-                '--accent-color': '#e53e3e',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(58, 15, 31, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            purple: {
-                '--primary-color': '#2a0a3a',
-                '--secondary-color': '#805ad5',
-                '--accent-color': '#9f7aea',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(42, 10, 58, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            orange: {
-                '--primary-color': '#4a2c0a',
-                '--secondary-color': '#e66c00',
-                '--accent-color': '#ff9900',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(74, 44, 10, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            teal: {
-                '--primary-color': '#0a3a3a',
-                '--secondary-color': '#008080',
-                '--accent-color': '#00cccc',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(10, 58, 58, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            pink: {
-                '--primary-color': '#3a0a2a',
-                '--secondary-color': '#cc0066',
-                '--accent-color': '#ff3399',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(58, 10, 42, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            gold: {
-                '--primary-color': '#4a3a0a',
-                '--secondary-color': '#8b6b00',
-                '--accent-color': '#ffcc00',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(74, 58, 10, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            emerald: {
-                '--primary-color': '#0a3a1a',
-                '--secondary-color': '#008040',
-                '--accent-color': '#00cc66',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(10, 58, 26, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            indigo: {
-                '--primary-color': '#1a0a3a',
-                '--secondary-color': '#4b0082',
-                '--accent-color': '#8a2be2',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ffffff',
-                '--glass-bg': 'rgba(26, 10, 58, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            sunrise: {
-                '--primary-color': '#ff7e5f',
-                '--secondary-color': '#feb47b',
-                '--accent-color': '#ffc107',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#333333',
-                '--glass-bg': 'rgba(255, 126, 95, 0.4)',
-                '--grid-color': 'rgba(0, 0, 0, 0.03)',
-                '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
-            },
-            twilight: {
-                '--primary-color': '#2c3e50',
-                '--secondary-color': '#34495e',
-                '--accent-color': '#95a5a6',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#ecf0f1',
-                '--glass-bg': 'rgba(44, 62, 80, 0.4)',
-                '--grid-color': 'rgba(255, 255, 255, 0.03)',
-                '--text-shadow-color': 'rgba(255, 255, 255, 1)'
-            },
-            mint: {
-                '--primary-color': '#a8e063',
-                '--secondary-color': '#56ab2f',
-                '--accent-color': '#388e3c',
-                '--warning-color': '#f59e0b',
-                '--danger-color': '#ef4444',
-                '--text-color': '#333333',
-                '--glass-bg': 'rgba(168, 224, 99, 0.4)',
-                '--grid-color': 'rgba(0, 0, 0, 0.03)',
-                '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
+        // Global or module-level variable for bouncing tail dot history
+        let bouncingTailDotPositions = [];
+        const BOUNCING_TAIL_HISTORY_LENGTH = 4; // Main dot + 3 tail dots
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Define color schemes
+            const colorSchemes = {
+                zinc: {
+                    '--primary-color': '#52525b',
+                    '--secondary-color': '#18181b',
+                    '--accent-color': '#71717a',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(8, 6, 7, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                blue: {
+                    '--primary-color': '#1a202c',
+                    '--secondary-color': '#2b6cb0',
+                    '--accent-color': '#4299e1',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(26, 32, 44, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                green: {
+                    '--primary-color': '#102e1c',
+                    '--secondary-color': '#2f855a',
+                    '--accent-color': '#48bb78',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(16, 46, 28, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                red: {
+                    '--primary-color': '#3a0f1f',
+                    '--secondary-color': '#c53030',
+                    '--accent-color': '#e53e3e',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(58, 15, 31, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                purple: {
+                    '--primary-color': '#2a0a3a',
+                    '--secondary-color': '#805ad5',
+                    '--accent-color': '#9f7aea',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(42, 10, 58, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                orange: {
+                    '--primary-color': '#4a2c0a',
+                    '--secondary-color': '#e66c00',
+                    '--accent-color': '#ff9900',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(74, 44, 10, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                teal: {
+                    '--primary-color': '#0a3a3a',
+                    '--secondary-color': '#008080',
+                    '--accent-color': '#00cccc',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(10, 58, 58, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                pink: {
+                    '--primary-color': '#3a0a2a',
+                    '--secondary-color': '#cc0066',
+                    '--accent-color': '#ff3399',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(58, 10, 42, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                gold: {
+                    '--primary-color': '#4a3a0a',
+                    '--secondary-color': '#8b6b00',
+                    '--accent-color': '#ffcc00',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(74, 58, 10, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                emerald: {
+                    '--primary-color': '#0a3a1a',
+                    '--secondary-color': '#008040',
+                    '--accent-color': '#00cc66',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(10, 58, 26, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                indigo: {
+                    '--primary-color': '#1a0a3a',
+                    '--secondary-color': '#4b0082',
+                    '--accent-color': '#8a2be2',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ffffff',
+                    '--glass-bg': 'rgba(26, 10, 58, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                sunrise: {
+                    '--primary-color': '#ff7e5f',
+                    '--secondary-color': '#feb47b',
+                    '--accent-color': '#ffc107',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#333333',
+                    '--glass-bg': 'rgba(255, 126, 95, 0.4)',
+                    '--grid-color': 'rgba(0, 0, 0, 0.03)',
+                    '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
+                },
+                twilight: {
+                    '--primary-color': '#2c3e50',
+                    '--secondary-color': '#34495e',
+                    '--accent-color': '#95a5a6',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#ecf0f1',
+                    '--glass-bg': 'rgba(44, 62, 80, 0.4)',
+                    '--grid-color': 'rgba(255, 255, 255, 0.03)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                mint: {
+                    '--primary-color': '#a8e063',
+                    '--secondary-color': '#56ab2f',
+                    '--accent-color': '#388e3c',
+                    '--warning-color': '#f59e0b',
+                    '--danger-color': '#ef4444',
+                    '--text-color': '#333333',
+                    '--glass-bg': 'rgba(168, 224, 99, 0.4)',
+                    '--grid-color': 'rgba(0, 0, 0, 0.03)',
+                    '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
+                }
+            };
+
+            // Define background themes
+            const backgroundThemes = {
+                default: {
+                    '--background-gradient-start': 'var(--primary-color)',
+                    '--background-gradient-end': 'var(--secondary-color)'
+                },
+                nebula: {
+                    '--background-gradient-start': '#0f0c29',
+                    '--background-gradient-end': '#302b63',
+                    '--primary-color': '#0f0c29',
+                    '--secondary-color': '#302b63',
+                    '--accent-color': '#4CAF50',
+                },
+                cyberpunk: {
+                    '--background-gradient-start': '#1a0a2a',
+                    '--background-gradient-end': '#0a1a2a',
+                    '--primary-color': '#1a0a2a',
+                    '--secondary-color': '#0a1a2a',
+                    '--accent-color': '#00ffff',
+                },
+                forest: {
+                    '--background-gradient-start': '#0a2a1a',
+                    '--background-gradient-end': '#1a0a0a',
+                    '--primary-color': '#0a2a1a',
+                    '--secondary-color': '#1a0a0a',
+                    '--accent-color': '#8BC34A',
+                },
+                ocean: {
+                    '--background-gradient-start': '#000428',
+                    '--background-gradient-end': '#004e92',
+                    '--primary-color': '#000428',
+                    '--secondary-color': '#004e92',
+                    '--accent-color': '#42a5f5',
+                },
+                sunset: {
+                    '--background-gradient-start': '#fdc830',
+                    '--background-gradient-end': '#f37335',
+                    '--primary-color': '#fdc830',
+                    '--secondary-color': '#f37335',
+                    '--accent-color': '#ff5722',
+                },
+                starlight: {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a1a2e',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a1a2e',
+                    '--accent-color': '#e0e0e0',
+                    '--grid-color': 'rgba(255, 255, 255, 0.05)',
+                },
+                geometric: {
+                    '--background-gradient-start': '#2c3e50',
+                    '--background-gradient-end': '#34495e',
+                    '--primary-color': '#2c3e50',
+                    '--secondary-color': '#34495e',
+                    '--accent-color': '#ecf0f1',
+                    '--grid-color': 'rgba(255, 255, 255, 0.1)',
+                },
+                'abstract-waves': {
+                    '--background-gradient-start': '#0f2027',
+                    '--background-gradient-end': '#203a43',
+                    '--primary-color': '#0f2027',
+                    '--secondary-color': '#203a43',
+                    '--accent-color': '#c4e0e5',
+                    '--grid-color': 'rgba(255, 255, 255, 0.02)',
+                    '--glass-bg': 'rgba(15, 32, 39, 0.4)',
+                },
+                'digital-matrix': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#001a00',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#001a00',
+                    '--accent-color': '#00ff00',
+                    '--grid-color': 'rgba(0, 255, 0, 0.05)',
+                    '--glass-bg': 'rgba(0, 26, 0, 0.4)',
+                }
+            };
+
+            // Define font families
+            const fontFamilies = {
+                'sf-mono': "'SF Mono', Monaco, 'Cascadia Code', monospace",
+                'digital-7': "'Digital-7', sans-serif",
+                'share-tech-mono': "'Share Tech Mono', monospace",
+                'vt323': "'VT323', monospace",
+                'press-start-2p': "'Press Start 2P', cursive",
+                'monoton': "'Monoton', cursive",
+                'bungee': "'Bungee', cursive",
+                'space-mono': "'Space Mono', monospace",
+                'cutive-mono': "'Cutive Mono', monospace"
+            };
+
+            // Define date formatters
+            const dateFormatters = {
+                'full': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz
+                }).format(date),
+                'short-mdy': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    month: '2-digit', day: '2-digit', year: 'numeric', timeZone: tz
+                }).format(date),
+                'short-dmy': (date, tz) => new Intl.DateTimeFormat('en-GB', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', timeZone: tz
+                }).format(date),
+                'iso': (date, tz) => new Intl.DateTimeFormat('en-CA', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', timeZone: tz
+                }).format(date),
+                'long-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
+                }).format(date),
+                'short-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    month: '2-digit', day: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz
+                }).format(date),
+                'day-month': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    day: 'numeric', month: 'long', timeZone: tz
+                }).format(date),
+                'day-month-year': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    day: 'numeric', month: 'long', year: 'numeric', timeZone: tz
+                }).format(date),
+                'time-only': (date, tz) => new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
+                }).format(date)
+            };
+
+            // Get references to elements
+            const root = document.documentElement;
+            const layoutScaleSlider = document.getElementById('layoutScaleSlider');
+            const fontScaleSlider = document.getElementById('fontScaleSlider');
+            const controlsDiv = document.getElementById('controls');
+            const settingsButton = document.getElementById('settings-button');
+            const colorSchemeSelect = document.getElementById('colorSchemeSelect');
+            const backgroundThemeSelect = document.getElementById('backgroundThemeSelect');
+            const clockFontSelect = document.getElementById('clockFontSelect');
+            const dateFormatSelect = document.getElementById('dateFormatSelect');
+            const timeZoneSelect = document.getElementById('timeZoneSelect');
+            const onAirToggle = document.getElementById('onAirToggle');
+            const onAirIndicator = document.getElementById('on-air-indicator');
+            const secondsSpan = document.getElementById('seconds'); // Get seconds span for pulse effect
+
+            // Progress bar elements
+            const progressBarSelect = document.getElementById('progressBarSelect');
+            const minuteBarProgressContainer = document.getElementById('minute-bar-progress-container');
+            const minuteBarProgressRect = document.getElementById('minute-bar-progress-rect');
+            const hourSegmentProgressContainer = document.getElementById('hour-segment-progress-container');
+            const hourSegmentProgressRect = document.getElementById('hour-segment-progress-rect');
+
+            // Second hand style elements
+            const secondHandStyleSelect = document.getElementById('secondHandStyleSelect');
+            const secondHandAnalog = document.getElementById('second-hand-analog');
+            const bouncingDot = document.getElementById('bouncing-dot');
+            const pulsingGlowContainer = document.getElementById('pulsing-glow-container');
+            const pulsingGlowText = document.getElementById('pulsing-glow-text');
+            const bouncingTailDotContainer = document.getElementById('bouncing-tail-dot-container');
+            const cometSecondHand = document.getElementById('comet-second-hand');
+
+
+            // Schedule modal elements
+            const scheduleModal = document.getElementById('schedule-modal');
+            const openScheduleModalBtn = document.getElementById('openScheduleModal');
+            const closeScheduleModalBtn = document.getElementById('close-schedule-modal');
+            const onAirScheduleToggle = document.getElementById('onAirScheduleToggle');
+            const scheduleList = document.getElementById('schedule-list');
+            const newStartTimeInput = document.getElementById('newStartTime');
+            const newEndTimeInput = document.getElementById('newEndTime');
+            const newEventDayCheckboxes = document.querySelectorAll('.new-event-day');
+            const addUpdateScheduleEventBtn = document.getElementById('addUpdateScheduleEvent');
+            const cancelEditScheduleEventBtn = document.getElementById('cancelEditScheduleEvent');
+
+            // Global variable to track if we are editing an event
+            let editingScheduleIndex = null;
+
+            // Initial schedule with default events
+            // Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            let onAirSchedule = [
+                { startTime: '07:50', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // Mon-Fri
+                { startTime: '21:00', endTime: '22:30', days: [1] },  // Monday only
+                { startTime: '20:00', endTime: '21:30', days: [4] }   // Thursday only
+            ];
+
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            function renderSchedule() {
+                scheduleList.innerHTML = ''; // Clear existing list
+                if (onAirSchedule.length === 0) {
+                    scheduleList.innerHTML = '<p class="text-center text-gray-400">No scheduled events.</p>';
+                    return;
+                }
+                onAirSchedule.forEach((event, index) => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.classList.add('schedule-entry');
+
+                    const daysText = event.days.length === 7 ? 'Every Day' :
+                                     event.days.length === 5 && event.days.every(d => d >= 1 && d <= 5) ? 'Weekdays' :
+                                     event.days.map(day => dayNames[day]).join(', ');
+
+                    entryDiv.innerHTML = `
+                        <div>
+                            <p class="text-lg">${event.startTime} - ${event.endTime}</p>
+                            <p class="days">${daysText}</p>
+                        </div>
+                        <div>
+                            <button class="edit-btn" data-index="${index}">Edit</button>
+                            <button data-index="${index}">Delete</button>
+                        </div>
+                    `;
+                    scheduleList.appendChild(entryDiv);
+                });
+
+                // Add event listeners to delete buttons
+                scheduleList.querySelectorAll('.schedule-entry button:last-child').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const indexToDelete = parseInt(event.target.dataset.index);
+                        onAirSchedule.splice(indexToDelete, 1);
+                        renderSchedule();
+                        updateClock(); // Re-evaluate ON AIR status
+                    });
+                });
+
+                // Add event listeners to edit buttons
+                scheduleList.querySelectorAll('.schedule-entry .edit-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        editingScheduleIndex = parseInt(event.target.dataset.index);
+                        const eventToEdit = onAirSchedule[editingScheduleIndex];
+
+                        newStartTimeInput.value = eventToEdit.startTime;
+                        newEndTimeInput.value = eventToEdit.endTime;
+                        newEventDayCheckboxes.forEach(checkbox => {
+                            checkbox.checked = eventToEdit.days.includes(parseInt(checkbox.value));
+                        });
+
+                        addUpdateScheduleEventBtn.textContent = 'Update Event';
+                        cancelEditScheduleEventBtn.classList.remove('hidden');
+                    });
+                });
             }
-        };
 
-        // Define background themes
-        const backgroundThemes = {
-            default: {
-                '--background-gradient-start': 'var(--primary-color)',
-                '--background-gradient-end': 'var(--secondary-color)'
-            },
-            nebula: {
-                '--background-gradient-start': '#0f0c29',
-                '--background-gradient-end': '#302b63',
-                '--primary-color': '#0f0c29',
-                '--secondary-color': '#302b63',
-                '--accent-color': '#4CAF50',
-            },
-            cyberpunk: {
-                '--background-gradient-start': '#1a0a2a',
-                '--background-gradient-end': '#0a1a2a',
-                '--primary-color': '#1a0a2a',
-                '--secondary-color': '#0a1a2a',
-                '--accent-color': '#00ffff',
-            },
-            forest: {
-                '--background-gradient-start': '#0a2a1a',
-                '--background-gradient-end': '#1a0a0a',
-                '--primary-color': '#0a2a1a',
-                '--secondary-color': '#1a0a0a',
-                '--accent-color': '#8BC34A',
-            },
-            ocean: {
-                '--background-gradient-start': '#000428',
-                '--background-gradient-end': '#004e92',
-                '--primary-color': '#000428',
-                '--secondary-color': '#004e92',
-                '--accent-color': '#42a5f5',
-            },
-            sunset: {
-                '--background-gradient-start': '#fdc830',
-                '--background-gradient-end': '#f37335',
-                '--primary-color': '#fdc830',
-                '--secondary-color': '#f37335',
-                '--accent-color': '#ff5722',
-            },
-            starlight: {
-                '--background-gradient-start': '#000000',
-                '--background-gradient-end': '#1a1a2e',
-                '--primary-color': '#000000',
-                '--secondary-color': '#1a1a2e',
-                '--accent-color': '#e0e0e0',
-                '--grid-color': 'rgba(255, 255, 255, 0.05)',
-            },
-            geometric: {
-                '--background-gradient-start': '#2c3e50',
-                '--background-gradient-end': '#34495e',
-                '--primary-color': '#2c3e50',
-                '--secondary-color': '#34495e',
-                '--accent-color': '#ecf0f1',
-                '--grid-color': 'rgba(255, 255, 255, 0.1)',
-            },
-            'abstract-waves': {
-                '--background-gradient-start': '#0f2027',
-                '--background-gradient-end': '#203a43',
-                '--primary-color': '#0f2027',
-                '--secondary-color': '#203a43',
-                '--accent-color': '#c4e0e5',
-                '--grid-color': 'rgba(255, 255, 255, 0.02)',
-                '--glass-bg': 'rgba(15, 32, 39, 0.4)',
-            },
-            'digital-matrix': {
-                '--background-gradient-start': '#000000',
-                '--background-gradient-end': '#001a00',
-                '--primary-color': '#000000',
-                '--secondary-color': '#001a00',
-                '--accent-color': '#00ff00',
-                '--grid-color': 'rgba(0, 255, 0, 0.05)',
-                '--glass-bg': 'rgba(0, 26, 0, 0.4)',
+            function clearNewEventForm() {
+                newStartTimeInput.value = '';
+                newEndTimeInput.value = '';
+                newEventDayCheckboxes.forEach(checkbox => checkbox.checked = false);
+                addUpdateScheduleEventBtn.textContent = 'Add Event';
+                cancelEditScheduleEventBtn.classList.add('hidden');
+                editingScheduleIndex = null;
             }
-        };
 
-        // Define font families
-        const fontFamilies = {
-            'sf-mono': "'SF Mono', Monaco, 'Cascadia Code', monospace",
-            'digital-7': "'Digital-7', sans-serif",
-            'share-tech-mono': "'Share Tech Mono', monospace",
-            'vt323': "'VT323', monospace",
-            'press-start-2p': "'Press Start 2P', cursive",
-            'monoton': "'Monoton', cursive",
-            'bungee': "'Bungee', cursive",
-            'space-mono': "'Space Mono', monospace",
-            'cutive-mono': "'Cutive Mono', monospace"
-        };
+            function addUpdateScheduleEntry() {
+                const newStartTime = newStartTimeInput.value;
+                const newEndTime = newEndTimeInput.value;
+                const newDays = Array.from(newEventDayCheckboxes)
+                                    .filter(checkbox => checkbox.checked)
+                                    .map(checkbox => parseInt(checkbox.value));
 
-        // Define date formatters
-        const dateFormatters = {
-            'full': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz
-            }).format(date),
-            'short-mdy': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                month: '2-digit', day: '2-digit', year: 'numeric', timeZone: tz
-            }).format(date),
-            'short-dmy': (date, tz) => new Intl.DateTimeFormat('en-GB', {
-                day: '2-digit', month: '2-digit', year: 'numeric', timeZone: tz
-            }).format(date),
-            'iso': (date, tz) => new Intl.DateTimeFormat('en-CA', {
-                year: 'numeric', month: '2-digit', day: '2-digit', timeZone: tz
-            }).format(date),
-            'long-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
-            }).format(date),
-            'short-date-time': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                month: '2-digit', day: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz
-            }).format(date),
-            'day-month': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                day: 'numeric', month: 'long', timeZone: tz
-            }).format(date),
-            'day-month-year': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                day: 'numeric', month: 'long', year: 'numeric', timeZone: tz
-            }).format(date),
-            'time-only': (date, tz) => new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz
-            }).format(date)
-        };
-
-        // Get references to elements
-        const root = document.documentElement;
-        const layoutScaleSlider = document.getElementById('layoutScaleSlider');
-        const fontScaleSlider = document.getElementById('fontScaleSlider');
-        const controlsDiv = document.getElementById('controls');
-        const settingsButton = document.getElementById('settings-button');
-        const colorSchemeSelect = document.getElementById('colorSchemeSelect');
-        const backgroundThemeSelect = document.getElementById('backgroundThemeSelect');
-        const clockFontSelect = document.getElementById('clockFontSelect');
-        const dateFormatSelect = document.getElementById('dateFormatSelect');
-        const timeZoneSelect = document.getElementById('timeZoneSelect');
-        const onAirToggle = document.getElementById('onAirToggle');
-        const onAirIndicator = document.getElementById('on-air-indicator');
-        const secondHand = document.getElementById('second-hand');
-
-        // Schedule modal elements
-        const scheduleModal = document.getElementById('schedule-modal');
-        const openScheduleModalBtn = document.getElementById('openScheduleModal');
-        const closeScheduleModalBtn = document.getElementById('close-schedule-modal');
-        const onAirScheduleToggle = document.getElementById('onAirScheduleToggle');
-        const scheduleList = document.getElementById('schedule-list');
-        const newStartTimeInput = document.getElementById('newStartTime');
-        const newEndTimeInput = document.getElementById('newEndTime');
-        const newEventDayCheckboxes = document.querySelectorAll('.new-event-day');
-        const addUpdateScheduleEventBtn = document.getElementById('addUpdateScheduleEvent');
-        const cancelEditScheduleEventBtn = document.getElementById('cancelEditScheduleEvent');
-
-        // Global variable to track if we are editing an event
-        let editingScheduleIndex = null;
-
-        // Initial schedule with default events
-        // Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        let onAirSchedule = [
-            { startTime: '07:50', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // Mon-Fri
-            { startTime: '21:00', endTime: '22:30', days: [1] },  // Monday only
-            { startTime: '20:00', endTime: '21:30', days: [4] }   // Thursday only
-        ];
-
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        function renderSchedule() {
-            scheduleList.innerHTML = ''; // Clear existing list
-            if (onAirSchedule.length === 0) {
-                scheduleList.innerHTML = '<p class="text-center text-gray-400">No scheduled events.</p>';
-                return;
-            }
-            onAirSchedule.forEach((event, index) => {
-                const entryDiv = document.createElement('div');
-                entryDiv.classList.add('schedule-entry');
-
-                const daysText = event.days.length === 7 ? 'Every Day' :
-                                 event.days.length === 5 && event.days.every(d => d >= 1 && d <= 5) ? 'Weekdays' :
-                                 event.days.map(day => dayNames[day]).join(', ');
-
-                entryDiv.innerHTML = `
-                    <div>
-                        <p class="text-lg">${event.startTime} - ${event.endTime}</p>
-                        <p class="days">${daysText}</p>
-                    </div>
-                    <div>
-                        <button class="edit-btn" data-index="${index}">Edit</button>
-                        <button data-index="${index}">Delete</button>
-                    </div>
-                `;
-                scheduleList.appendChild(entryDiv);
-            });
-
-            // Add event listeners to delete buttons
-            scheduleList.querySelectorAll('.schedule-entry button:last-child').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const indexToDelete = parseInt(event.target.dataset.index);
-                    onAirSchedule.splice(indexToDelete, 1);
+                if (newStartTime && newEndTime && newDays.length > 0) {
+                    if (editingScheduleIndex !== null) {
+                        // Update existing event
+                        onAirSchedule[editingScheduleIndex] = { startTime: newStartTime, endTime: newEndTime, days: newDays };
+                    } else {
+                        // Add new event
+                        onAirSchedule.push({ startTime: newStartTime, endTime: newEndTime, days: newDays });
+                    }
                     renderSchedule();
                     updateClock(); // Re-evaluate ON AIR status
-                });
-            });
-
-            // Add event listeners to edit buttons
-            scheduleList.querySelectorAll('.schedule-entry .edit-btn').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    editingScheduleIndex = parseInt(event.target.dataset.index);
-                    const eventToEdit = onAirSchedule[editingScheduleIndex];
-
-                    newStartTimeInput.value = eventToEdit.startTime;
-                    newEndTimeInput.value = eventToEdit.endTime;
-                    newEventDayCheckboxes.forEach(checkbox => {
-                        checkbox.checked = eventToEdit.days.includes(parseInt(checkbox.value));
-                    });
-
-                    addUpdateScheduleEventBtn.textContent = 'Update Event';
-                    cancelEditScheduleEventBtn.classList.remove('hidden');
-                });
-            });
-        }
-
-        function clearNewEventForm() {
-            newStartTimeInput.value = '';
-            newEndTimeInput.value = '';
-            newEventDayCheckboxes.forEach(checkbox => checkbox.checked = false);
-            addUpdateScheduleEventBtn.textContent = 'Add Event';
-            cancelEditScheduleEventBtn.classList.add('hidden');
-            editingScheduleIndex = null;
-        }
-
-        function addUpdateScheduleEntry() {
-            const newStartTime = newStartTimeInput.value;
-            const newEndTime = newEndTimeInput.value;
-            const newDays = Array.from(newEventDayCheckboxes)
-                                .filter(checkbox => checkbox.checked)
-                                .map(checkbox => parseInt(checkbox.value));
-
-            if (newStartTime && newEndTime && newDays.length > 0) {
-                if (editingScheduleIndex !== null) {
-                    // Update existing event
-                    onAirSchedule[editingScheduleIndex] = { startTime: newStartTime, endTime: newEndTime, days: newDays };
+                    clearNewEventForm(); // Clear inputs and reset button
                 } else {
-                    // Add new event
-                    onAirSchedule.push({ startTime: newStartTime, endTime: newEndTime, days: newDays });
+                    console.warn('Please fill in all fields for the schedule event.');
                 }
+            }
+
+            function updateClock() {
+                const selectedTimeZone = timeZoneSelect.value;
+                const now = new Date();
+
+                // Time formatting
+                const timeOptions = {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZone: selectedTimeZone
+                };
+                const timeFormatter = new Intl.DateTimeFormat('en-US', timeOptions);
+                const parts = timeFormatter.formatToParts(now);
+
+                let hours = parts.find(p => p.type === 'hour').value;
+                let minutes = parts.find(p => p.type === 'minute').value;
+                let seconds = parts.find(p => p.type === 'second').value;
+
+                document.getElementById('hours').textContent = hours;
+                document.getElementById('minutes').textContent = minutes;
+
+                // Handle seconds span for pulse effect
+                if (secondsSpan.textContent !== seconds) {
+                    secondsSpan.classList.remove('second-pulse');
+                    void secondsSpan.offsetWidth; // Trigger reflow to restart animation
+                    secondsSpan.classList.add('second-pulse'); // Keep pulse for general update
+                }
+                secondsSpan.textContent = seconds;
+
+
+                // Date formatting
+                const selectedDateFormat = dateFormatSelect.value;
+                const dateString = dateFormatters[selectedDateFormat](now, selectedTimeZone);
+                document.getElementById('date-text').textContent = dateString;
+
+                // ON AIR indicator logic
+                const currentLocalTime = new Date(now.toLocaleString('en-US', { timeZone: selectedTimeZone }));
+                const currentHour = currentLocalTime.getHours();
+                const currentMinute = currentLocalTime.getMinutes();
+                const currentSecond = currentLocalTime.getSeconds(); // Get seconds for bouncing dot
+                const currentDay = currentLocalTime.getDay();
+
+                let isScheduledOnAir = false;
+                if (onAirScheduleToggle.checked) {
+                    for (const event of onAirSchedule) {
+                        const [startHour, startMinute] = event.startTime.split(':').map(Number);
+                        const [endHour, endMinute] = event.endTime.split(':').map(Number);
+
+                        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+                        const startTimeInMinutes = startHour * 60 + startMinute;
+                        const endTimeInMinutes = endHour * 60 + endMinute;
+
+                        let isTimeMatch = false;
+                        if (startTimeInMinutes <= endTimeInMinutes) {
+                            isTimeMatch = currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
+                        } else {
+                            isTimeMatch = currentTimeInMinutes >= startTimeInMinutes || currentTimeInMinutes < endTimeInMinutes;
+                        }
+
+                        const isDayMatch = event.days.includes(currentDay);
+
+                        if (isTimeMatch && isDayMatch) {
+                            isScheduledOnAir = true;
+                            break;
+                        }
+                    }
+                }
+
+                const isOnAir = onAirToggle.checked || isScheduledOnAir;
+
+                if (isOnAir) {
+                    onAirIndicator.style.display = 'block';
+                    onAirIndicator.classList.add('blinking');
+                } else {
+                    onAirIndicator.style.display = 'none';
+                    onAirIndicator.classList.remove('blinking');
+                }
+
+                // Update Progress Bars
+                const selectedProgressBar = progressBarSelect.value;
+                const hourSegmentWidth = 100; // SVG viewBox width is 100
+                const minuteBarWidth = 100; // SVG viewBox width is 100 (for rect width calculation)
+
+                // Hide all progress bars
+                minuteBarProgressContainer.style.display = 'none';
+                hourSegmentProgressContainer.style.display = 'none';
+
+                if (selectedProgressBar === 'minute-bar') {
+                    minuteBarProgressContainer.style.display = 'block';
+                    const totalSecondsInMinute = parseInt(seconds);
+                    const minuteProgressPercentage = (totalSecondsInMinute / 60);
+                    const filledLength = minuteBarWidth * minuteProgressPercentage;
+                    minuteBarProgressRect.style.width = `${filledLength}%`;
+                } else if (selectedProgressBar === 'hour-segment') {
+                    hourSegmentProgressContainer.style.display = 'block';
+                    const totalMinutesInHour = currentMinute + (parseInt(seconds) / 60);
+                    const hourProgressPercentage = (totalMinutesInHour / 60);
+                    const filledLength = hourSegmentWidth * hourProgressPercentage;
+                    hourSegmentProgressRect.style.width = `${filledLength}%`;
+                }
+
+
+                // Update Second Hand Styles (single selection)
+                const selectedSecondHandStyle = secondHandStyleSelect.value;
+                
+                // First, hide/reset all second hand elements
+                document.querySelectorAll('.second-hand-element').forEach(el => el.style.display = 'none');
+                pulsingGlowText.style.animation = 'none'; // Reset animation
+                secondsSpan.classList.remove('flicker-active'); // Ensure flicker is removed if not selected
+
+                // Reset bouncing tail dot history when style changes
+                if (selectedSecondHandStyle !== 'bouncing-tail-dot') {
+                    bouncingTailDotPositions = [];
+                }
+
+                if (selectedSecondHandStyle === 'analog-hand') {
+                    secondHandAnalog.style.display = 'block';
+                    const secondAngle = (parseInt(seconds) / 60) * 360;
+                    secondHandAnalog.style.transform = `translateX(-50%) translateY(-100%) rotate(${secondAngle}deg)`;
+                } else if (selectedSecondHandStyle === 'bouncing-dot') {
+                    bouncingDot.style.display = 'block';
+                    const radius = 45;
+                    const centerX = 50;
+                    const centerY = 50;
+                    const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
+                    const x = centerX + radius * Math.sin(angleRad);
+                    const y = centerY - radius * Math.cos(angleRad);
+                    bouncingDot.style.left = `calc(${x}% - 7.5px)`;
+                    bouncingDot.style.top = `calc(${y}% - 7.5px)`;
+                } else if (selectedSecondHandStyle === 'pulsing-glow') {
+                    pulsingGlowContainer.style.display = 'flex';
+                    pulsingGlowText.textContent = `${hours}:${minutes}:${seconds}`;
+                    pulsingGlowText.style.animation = 'pulse-glow 1s infinite alternate';
+                } else if (selectedSecondHandStyle === 'bouncing-tail-dot') {
+                    bouncingTailDotContainer.style.display = 'block';
+                    const radius = 45;
+                    const centerX = 50;
+                    const centerY = 50;
+                    const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
+
+                    // Current main dot position
+                    const currentMainX = centerX + radius * Math.sin(angleRad);
+                    const currentMainY = centerY - radius * Math.cos(angleRad);
+
+                    // Add current position to history
+                    bouncingTailDotPositions.unshift({ x: currentMainX, y: currentMainY }); // Add to front
+                    if (bouncingTailDotPositions.length > BOUNCING_TAIL_HISTORY_LENGTH) {
+                        bouncingTailDotPositions.pop(); // Remove oldest if history too long
+                    }
+
+                    const dotElements = document.querySelectorAll('#bouncing-tail-dot-container .bouncing-tail-dot-segment');
+
+                    dotElements.forEach((segment, index) => {
+                        if (bouncingTailDotPositions[index]) {
+                            const pos = bouncingTailDotPositions[index];
+                            const segmentSize = 15 - (index * 3); // Decrease size for tail, main dot is index 0
+                            segment.style.width = `${segmentSize}px`;
+                            segment.style.height = `${segmentSize}px`;
+                            segment.style.left = `calc(${pos.x}% - ${segmentSize / 2}px)`;
+                            segment.style.top = `calc(${pos.y}% - ${segmentSize / 2}px)`;
+                            segment.style.opacity = 1 - (index * 0.2); // Fade out tail dots
+                            segment.style.display = 'block';
+                        } else {
+                            segment.style.display = 'none'; // Hide if no history for this tail dot
+                        }
+                    });
+                } else if (selectedSecondHandStyle === 'comet') {
+                    cometSecondHand.style.display = 'block';
+                    const radius = 45; // Radius for positioning
+                    const centerX = 50; // Percentage for center of clock-circle
+                    const centerY = 50;
+                    const secondAngle = (parseInt(seconds) / 60) * 360; // Angle in degrees
+
+                    // Position the center of the comet element on the circle's path
+                    const elementCenterOffset = 40; // Half of comet's width (80px / 2)
+                    const elementHeightOffset = 7.5; // Half of comet's height (15px / 2)
+
+                    const posX = centerX + radius * Math.sin(secondAngle * Math.PI / 180);
+                    const posY = centerY - radius * Math.cos(secondAngle * Math.PI / 180);
+
+                    cometSecondHand.style.left = `calc(${posX}% - ${elementCenterOffset}px)`;
+                    cometSecondHand.style.top = `calc(${posY}% - ${elementHeightOffset}px)`;
+
+                    // Rotate the comet so its tail trails behind.
+                    // Adding 90 degrees aligns the element's horizontal axis with the tangent of the circle.
+                    cometSecondHand.style.transform = `rotate(${secondAngle + 90}deg)`;
+                }
+            }
+
+            function applyColorScheme(schemeName) {
+                const scheme = colorSchemes[schemeName];
+                if (scheme) {
+                    for (const [prop, value] of Object.entries(scheme)) {
+                        root.style.setProperty(prop, value);
+                    }
+                    applyBackgroundTheme(backgroundThemeSelect.value);
+                }
+            }
+
+            function applyBackgroundTheme(themeName) {
+                const theme = backgroundThemes[themeName];
+                if (theme) {
+                    for (const [prop, value] of Object.entries(theme)) {
+                        root.style.setProperty(prop, value);
+                    }
+                }
+            }
+
+            function applyClockFont(fontName) {
+                const font = fontFamilies[fontName];
+                if (font) {
+                    root.style.setProperty('--clock-font-family', font);
+                }
+            }
+
+            // Event listeners
+            layoutScaleSlider.addEventListener('input', (event) => {
+                const layoutScale = parseFloat(event.target.value);
+                root.style.setProperty('--layout-scale-factor', layoutScale);
+                const currentFontSliderValue = parseFloat(fontScaleSlider.value);
+                root.style.setProperty('--font-scale-factor', currentFontSliderValue);
+            });
+
+            fontScaleSlider.addEventListener('input', (event) => {
+                const fontScale = parseFloat(event.target.value);
+                root.style.setProperty('--font-scale-factor', fontScale);
+            });
+
+            settingsButton.addEventListener('click', () => {
+                if (controlsDiv.style.opacity === '0' || controlsDiv.style.opacity === '') {
+                    controlsDiv.style.opacity = '1';
+                    controlsDiv.style.visibility = 'visible';
+                } else {
+                    controlsDiv.style.opacity = '0';
+                    controlsDiv.style.visibility = 'hidden';
+                }
+            });
+
+            colorSchemeSelect.addEventListener('change', (event) => {
+                applyColorScheme(event.target.value);
+            });
+
+            backgroundThemeSelect.addEventListener('change', (event) => {
+                applyBackgroundTheme(event.target.value);
+            });
+
+            clockFontSelect.addEventListener('change', (event) => {
+                applyClockFont(event.target.value);
+            });
+
+            dateFormatSelect.addEventListener('change', updateClock);
+            timeZoneSelect.addEventListener('change', updateClock);
+            onAirToggle.addEventListener('change', updateClock);
+            progressBarSelect.addEventListener('change', updateClock); // Update on progress bar type change
+            
+            // Event listener for second hand style select
+            secondHandStyleSelect.addEventListener('change', (event) => {
+                // Reset bouncing tail dot history when style changes
+                bouncingTailDotPositions = [];
+                updateClock();
+            });
+
+
+            // Schedule Modal Event Listeners
+            openScheduleModalBtn.addEventListener('click', () => {
+                scheduleModal.classList.remove('hidden');
                 renderSchedule();
-                updateClock(); // Re-evaluate ON AIR status
-                clearNewEventForm(); // Clear inputs and reset button
-            } else {
-                console.warn('Please fill in all fields for the schedule event.');
-            }
-        }
+            });
 
-        function updateClock() {
-            const selectedTimeZone = timeZoneSelect.value;
-            const now = new Date();
+            closeScheduleModalBtn.addEventListener('click', () => {
+                scheduleModal.classList.add('hidden');
+                clearNewEventForm(); // Clear form when closing modal
+            });
 
-            // Time formatting
-            const timeOptions = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZone: selectedTimeZone
-            };
-            const timeFormatter = new Intl.DateTimeFormat('en-US', timeOptions);
-            const parts = timeFormatter.formatToParts(now);
+            onAirScheduleToggle.addEventListener('change', updateClock);
+            addUpdateScheduleEventBtn.addEventListener('click', addUpdateScheduleEntry);
+            cancelEditScheduleEventBtn.addEventListener('click', clearNewEventForm);
 
-            let hours = parts.find(p => p.type === 'hour').value;
-            let minutes = parts.find(p => p.type === 'minute').value;
-            let seconds = parts.find(p => p.type === 'second').value;
 
-            document.getElementById('hours').textContent = hours;
-            document.getElementById('minutes').textContent = minutes;
+            newEventDayCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateClock);
+            });
 
-            const secondsSpan = document.getElementById('seconds');
-            if (secondsSpan.textContent !== seconds) {
-                secondsSpan.classList.remove('second-pulse');
-                void secondsSpan.offsetWidth;
-                secondsSpan.classList.add('second-pulse');
-            }
-            secondsSpan.textContent = seconds;
+            // Initial calls and set interval for updates
+            // Apply default settings on load
+            colorSchemeSelect.value = 'digital-matrix';
+            applyColorScheme('digital-matrix'); // Apply Digital Matrix theme by default
+            backgroundThemeSelect.value = 'digital-matrix';
+            applyBackgroundTheme('digital-matrix'); // Apply Digital Matrix theme by default
+            clockFontSelect.value = 'sf-mono';
+            applyClockFont('sf-mono');
+            dateFormatSelect.value = 'short-dmy';
+            timeZoneSelect.value = 'Europe/Warsaw';
+            progressBarSelect.value = 'minute-bar'; // Set default progress bar to Minute Bar
+            secondHandStyleSelect.value = 'analog-hand'; // Set default second hand style
 
-            // Date formatting
-            const selectedDateFormat = dateFormatSelect.value;
-            const dateString = dateFormatters[selectedDateFormat](now, selectedTimeZone);
-            document.getElementById('date-text').textContent = dateString;
 
-            // Update Second Hand (Analog Style)
-            const secondAngle = (parseInt(seconds) / 60) * 360;
-            secondHand.style.transform = `translateX(-50%) translateY(-100%) rotate(${secondAngle}deg)`;
-
-            // ON AIR indicator logic
-            const currentLocalTime = new Date(now.toLocaleString('en-US', { timeZone: selectedTimeZone }));
-            const currentHour = currentLocalTime.getHours();
-            const currentMinute = currentLocalTime.getMinutes();
-            const currentDay = currentLocalTime.getDay();
-
-            let isScheduledOnAir = false;
-            if (onAirScheduleToggle.checked) {
-                for (const event of onAirSchedule) {
-                    const [startHour, startMinute] = event.startTime.split(':').map(Number);
-                    const [endHour, endMinute] = event.endTime.split(':').map(Number);
-
-                    const currentTimeInMinutes = currentHour * 60 + currentMinute;
-                    const startTimeInMinutes = startHour * 60 + startMinute;
-                    const endTimeInMinutes = endHour * 60 + endMinute;
-
-                    let isTimeMatch = false;
-                    if (startTimeInMinutes <= endTimeInMinutes) {
-                        isTimeMatch = currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
-                    } else {
-                        isTimeMatch = currentTimeInMinutes >= startTimeInMinutes || currentTimeInMinutes < endTimeInMinutes;
-                    }
-
-                    const isDayMatch = event.days.includes(currentDay);
-
-                    if (isTimeMatch && isDayMatch) {
-                        isScheduledOnAir = true;
-                        break;
-                    }
-                }
-            }
-
-            const isOnAir = onAirToggle.checked || isScheduledOnAir;
-
-            if (isOnAir) {
-                onAirIndicator.style.display = 'block';
-                onAirIndicator.classList.add('blinking');
-            } else {
-                onAirIndicator.style.display = 'none';
-                onAirIndicator.classList.remove('blinking');
-            }
-        }
-
-        function applyColorScheme(schemeName) {
-            const scheme = colorSchemes[schemeName];
-            if (scheme) {
-                for (const [prop, value] of Object.entries(scheme)) {
-                    root.style.setProperty(prop, value);
-                }
-                applyBackgroundTheme(backgroundThemeSelect.value);
-            }
-        }
-
-        function applyBackgroundTheme(themeName) {
-            const theme = backgroundThemes[themeName];
-            if (theme) {
-                for (const [prop, value] of Object.entries(theme)) {
-                    root.style.setProperty(prop, value);
-                }
-            }
-        }
-
-        function applyClockFont(fontName) {
-            const font = fontFamilies[fontName];
-            if (font) {
-                root.style.setProperty('--clock-font-family', font);
-            }
-        }
-
-        // Event listeners
-        layoutScaleSlider.addEventListener('input', (event) => {
-            const layoutScale = parseFloat(event.target.value);
-            root.style.setProperty('--layout-scale-factor', layoutScale);
-            const currentFontSliderValue = parseFloat(fontScaleSlider.value);
-            root.style.setProperty('--font-scale-factor', currentFontSliderValue);
+            updateClock();
+            setInterval(updateClock, 1000);
         });
-
-        fontScaleSlider.addEventListener('input', (event) => {
-            const fontScale = parseFloat(event.target.value);
-            root.style.setProperty('--font-scale-factor', fontScale);
-        });
-
-        settingsButton.addEventListener('click', () => {
-            if (controlsDiv.style.opacity === '0' || controlsDiv.style.opacity === '') {
-                controlsDiv.style.opacity = '1';
-                controlsDiv.style.visibility = 'visible';
-            } else {
-                controlsDiv.style.opacity = '0';
-                controlsDiv.style.visibility = 'hidden';
-            }
-        });
-
-        colorSchemeSelect.addEventListener('change', (event) => {
-            applyColorScheme(event.target.value);
-        });
-
-        backgroundThemeSelect.addEventListener('change', (event) => {
-            applyBackgroundTheme(event.target.value);
-        });
-
-        clockFontSelect.addEventListener('change', (event) => {
-            applyClockFont(event.target.value);
-        });
-
-        dateFormatSelect.addEventListener('change', updateClock);
-        timeZoneSelect.addEventListener('change', updateClock);
-        onAirToggle.addEventListener('change', updateClock);
-
-        // Schedule Modal Event Listeners
-        openScheduleModalBtn.addEventListener('click', () => {
-            scheduleModal.classList.remove('hidden');
-            renderSchedule();
-        });
-
-        closeScheduleModalBtn.addEventListener('click', () => {
-            scheduleModal.classList.add('hidden');
-            clearNewEventForm(); // Clear form when closing modal
-        });
-
-        onAirScheduleToggle.addEventListener('change', updateClock);
-        addUpdateScheduleEventBtn.addEventListener('click', addUpdateScheduleEntry);
-        cancelEditScheduleEventBtn.addEventListener('click', clearNewEventForm);
-
-
-        newEventDayCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateClock);
-        });
-
-        // Initial calls and set interval for updates
-        // Apply default settings on load
-        applyColorScheme(backgroundThemeSelect.value); // Apply Digital Matrix theme by default
-        applyBackgroundTheme(backgroundThemeSelect.value);
-        applyClockFont(clockFontSelect.value);
-
-        updateClock();
-        setInterval(updateClock, 1000);
     </script>
 </body>
 </html>
