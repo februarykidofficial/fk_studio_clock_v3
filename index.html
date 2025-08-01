@@ -86,7 +86,8 @@
             position: relative;
         }
 
-        /* SVG Glow Filter */
+        /* SVG Glow Filter for minute bar */
+        /* This filter is defined here and referenced by ID in CSS */
         .glow-filter {
             filter: drop-shadow(0 0 5px var(--progress-bar-color)) drop-shadow(0 0 10px var(--progress-bar-color)) drop-shadow(0 0 15px var(--progress-bar-color));
         }
@@ -189,16 +190,17 @@
         /* Minute Bar Progress Bar */
         #minute-bar-progress-container {
             position: absolute;
-            bottom: 20px; /* Position at the bottom of the main panel */
-            left: 10%; /* Start from left */
-            width: 80%; /* Total width */
-            height: 10px;
+            bottom: 40px; /* Moved up and fatter */
+            left: 5%; /* Wider */
+            width: 90%; /* Total width */
+            height: 20px; /* Fatter */
             z-index: 2;
             display: none; /* Hidden by default */
             overflow: hidden; /* Clip the rect if it goes beyond 100% */
-            border-radius: 5px; /* Match rect border-radius */
+            border-radius: 10px; /* Match rect border-radius */
             background-color: rgba(255, 255, 255, 0.1); /* Background for the progress bar track */
             filter: url(#glowFilter); /* Apply glow filter to the container */
+            animation: pulse-glow-bar 2s infinite alternate; /* Add pulsing animation */
         }
 
         #minute-bar-progress-rect {
@@ -207,7 +209,14 @@
             height: 100%;
             width: 0%; /* Start at 0% width */
             transition: width 0.5s linear;
-            border-radius: 5px; /* Rounded corners for the filled bar */
+            border-radius: 10px; /* Rounded corners for the filled bar */
+        }
+
+        /* New keyframes for pulsing glow bar */
+        @keyframes pulse-glow-bar {
+            0% { filter: url(#glowFilter) drop-shadow(0 0 5px var(--progress-bar-color)); opacity: 0.7; }
+            50% { filter: url(#glowFilter) drop-shadow(0 0 15px var(--progress-bar-color)) drop-shadow(0 0 30px var(--progress-bar-color)); opacity: 1; }
+            100% { filter: url(#glowFilter) drop-shadow(0 0 5px var(--progress-bar-color)); opacity: 0.7; }
         }
 
         /* Hour Segment Progress Bar */
@@ -880,6 +889,24 @@
             }
         }
     </style>
+    <!-- SVG Filter Definition for the neon glow effect -->
+    <svg width="0" height="0" style="position: absolute; z-index: -1;">
+        <defs>
+            <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"></feGaussianBlur>
+                <feColorMatrix type="matrix" values="
+                    1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    0 0 0 18 -7
+                " result="coloredBlur"></feColorMatrix>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
 </head>
 <body>
     <div class="background-decoration"></div>
@@ -1030,7 +1057,11 @@
             <div class="control-group">
                 <label for="backgroundThemeSelect">Background Theme:</label>
                 <select id="backgroundThemeSelect">
-                    <option value="digital-matrix">Digital Matrix</option>
+                    <option value="digital-matrix">Digital Matrix (Green)</option>
+                    <option value="digital-matrix-blue">Digital Matrix (Blue)</option>
+                    <option value="digital-matrix-red">Digital Matrix (Red)</option>
+                    <option value="digital-matrix-purple">Digital Matrix (Purple)</option>
+                    <option value="digital-matrix-yellow">Digital Matrix (Yellow)</option>
                     <option value="default">Default Gradient</option>
                     <option value="nebula">Nebula</option>
                     <option value="cyberpunk">Cyberpunk</option>
@@ -1296,15 +1327,6 @@
                     '--glass-bg': 'rgba(168, 224, 99, 0.4)',
                     '--grid-color': 'rgba(0, 0, 0, 0.03)',
                     '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
-                },
-                'digital-matrix': {
-                    '--background-gradient-start': '#000000',
-                    '--background-gradient-end': '#001a00',
-                    '--primary-color': '#000000',
-                    '--secondary-color': '#001a00',
-                    '--accent-color': '#00ff00',
-                    '--grid-color': 'rgba(0, 255, 0, 0.05)',
-                    '--glass-bg': 'rgba(0, 26, 0, 0.4)',
                 }
             };
 
@@ -1379,9 +1401,50 @@
                     '--background-gradient-end': '#001a00',
                     '--primary-color': '#000000',
                     '--secondary-color': '#001a00',
-                    '--accent-color': '#00ff00',
+                    '--accent-color': '#00ff00', /* Green */
                     '--grid-color': 'rgba(0, 255, 0, 0.05)',
                     '--glass-bg': 'rgba(0, 26, 0, 0.4)',
+                    '--text-shadow-color': 'rgba(0, 255, 0, 1)'
+                },
+                'digital-matrix-blue': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#00001a',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#00001a',
+                    '--accent-color': '#0000ff', /* Blue */
+                    '--grid-color': 'rgba(0, 0, 255, 0.05)',
+                    '--glass-bg': 'rgba(0, 0, 26, 0.4)',
+                    '--text-shadow-color': 'rgba(0, 0, 255, 1)'
+                },
+                'digital-matrix-red': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a0000',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a0000',
+                    '--accent-color': '#ff0000', /* Red */
+                    '--grid-color': 'rgba(255, 0, 0, 0.05)',
+                    '--glass-bg': 'rgba(26, 0, 0, 0.4)',
+                    '--text-shadow-color': 'rgba(255, 0, 0, 1)'
+                },
+                'digital-matrix-purple': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a001a',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a001a',
+                    '--accent-color': '#ff00ff', /* Magenta/Purple */
+                    '--grid-color': 'rgba(255, 0, 255, 0.05)',
+                    '--glass-bg': 'rgba(26, 0, 26, 0.4)',
+                    '--text-shadow-color': 'rgba(255, 0, 255, 1)'
+                },
+                'digital-matrix-yellow': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a1a00',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a1a00',
+                    '--accent-color': '#ffff00', /* Yellow */
+                    '--grid-color': 'rgba(255, 255, 0, 0.05)',
+                    '--glass-bg': 'rgba(26, 26, 0, 0.4)',
+                    '--text-shadow-color': 'rgba(255, 255, 0, 1)'
                 }
             };
 
@@ -1482,7 +1545,8 @@
             // Initial schedule with default events
             // Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
             let onAirSchedule = [
-                { startTime: '07:50', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // Mon-Fri
+                { startTime: '07:50', endTime: '08:55', days: [1, 2, 3, 4, 5] }, // Mon-Fri, changed end time
+                { startTime: '09:07', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // New event for Mon-Fri
                 { startTime: '21:00', endTime: '22:30', days: [1] },  // Monday only
                 { startTime: '20:00', endTime: '21:30', days: [4] }   // Thursday only
             ];
