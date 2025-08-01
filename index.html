@@ -45,13 +45,16 @@
             --base-clock-font-size: 6vw; /* Base font size relative to viewport width */
             --base-date-font-size: 2vw; /* Base font size relative to viewport width */
 
-            /* Main panel dimensions based on the smaller of viewport width/height */
-            --base-main-panel-size: min(90vw, 90vh);
-            --base-main-panel-padding: min(5vw, 5vh); /* Padding scales with viewport */
+            /* Main panel dimensions based on the smaller of viewport width/height (vmin) */
+            --base-main-panel-size: 90vmin; /* Ensures square aspect ratio */
+            --base-main-panel-padding: 5vmin; /* Padding scales with vmin */
 
             /* Clock circle dimensions relative to its parent (main-panel) */
             --base-clock-circle-size: 80%; /* Percentage of parent */
 
+            /* Date position variables */
+            --date-top-position: 20%;
+            --date-left-position: 50%;
 
             /* Font Families */
             --clock-font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* New default font */
@@ -129,6 +132,8 @@
             /* Use base-main-panel-size for width and height, scaled by layout-scale-factor */
             width: calc(var(--base-main-panel-size) * var(--layout-scale-factor));
             height: calc(var(--base-main-panel-size) * var(--layout-scale-factor));
+            max-width: calc(var(--base-main-panel-size) * var(--layout-scale-factor)); /* Added max-width */
+            max-height: calc(var(--base-main-panel-size) * var(--layout-scale-factor)); /* Added max-height */
             padding: calc(var(--base-main-panel-padding) * var(--layout-scale-factor));
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -144,7 +149,6 @@
             align-items: center;
             overflow: hidden;
             aspect-ratio: 1 / 1; /* Explicitly maintain square aspect ratio */
-            /* Removed max-width as min(vw, vh) handles scaling */
         }
 
         /* Subtle grid pattern inside the main panel */
@@ -196,11 +200,10 @@
             height: 20px; /* Fatter */
             z-index: 2;
             display: none; /* Hidden by default */
-            overflow: hidden; /* Clip the rect if it goes beyond 100% */
+            overflow: hidden; /* Restore overflow: hidden */
             border-radius: 10px; /* Match rect border-radius */
             background-color: rgba(255, 255, 255, 0.1); /* Background for the progress bar track */
-            filter: url(#glowFilter); /* Apply glow filter to the container */
-            animation: pulse-glow-bar 2s infinite alternate; /* Add pulsing animation */
+            /* Removed filter and animation from container */
         }
 
         #minute-bar-progress-rect {
@@ -210,14 +213,11 @@
             width: 0%; /* Start at 0% width */
             transition: width 0.5s linear;
             border-radius: 10px; /* Rounded corners for the filled bar */
+            /* Removed filter and animation from rect */
         }
 
         /* New keyframes for pulsing glow bar */
-        @keyframes pulse-glow-bar {
-            0% { filter: url(#glowFilter) drop-shadow(0 0 5px var(--progress-bar-color)); opacity: 0.7; }
-            50% { filter: url(#glowFilter) drop-shadow(0 0 15px var(--progress-bar-color)) drop-shadow(0 0 30px var(--progress-bar-color)); opacity: 1; }
-            100% { filter: url(#glowFilter) drop-shadow(0 0 5px var(--progress-bar-color)); opacity: 0.7; }
-        }
+        /* Removed @keyframes pulse-glow-bar as it's no longer used for minute bar */
 
         /* Hour Segment Progress Bar */
         #hour-segment-progress-container {
@@ -460,9 +460,9 @@
             text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
             text-align: center;
             position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: var(--date-top-position); /* Use CSS variable */
+            left: var(--date-left-position); /* Use CSS variable */
+            transform: translateX(-50%); /* Keep horizontal centering relative to left */
             z-index: 2;
             white-space: nowrap;
         }
@@ -561,7 +561,7 @@
         #controls input[type="range"],
         #controls select,
         #controls input[type="number"],
-        #controls input[type="time"] {
+        #controls input[type="text"][pattern] { /* Target text inputs with pattern */
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
@@ -580,7 +580,7 @@
         #controls select:focus,
         #controls input[type="range"]:focus,
         #controls input[type="number"]:focus,
-        #controls input[type="time"]:focus {
+        #controls input[type="text"][pattern]:focus { /* Target text inputs with pattern */
             border-color: var(--accent-color);
             box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.5);
         }
@@ -786,8 +786,8 @@
         @media (max-width: 768px) {
             .main-panel {
                 /* Adjust base size for smaller screens */
-                --base-main-panel-size: min(95vw, 95vh);
-                --base-main-panel-padding: min(30px, 5vh); /* Use px for smaller padding */
+                --base-main-panel-size: 95vmin; /* Use vmin for consistency */
+                --base-main-panel-padding: 5vmin; /* Use vmin for consistency */
                 border-radius: 30px; /* Fixed radius for consistency */
             }
 
@@ -807,9 +807,9 @@
             }
 
             #date-text {
-                top: 15%;
-                /* Adjust base font size for smaller screens */
-                --base-date-font-size: 3vw;
+                /* Use CSS variables for responsiveness */
+                top: var(--date-top-position);
+                left: var(--date-left-position);
             }
 
             #on-air-indicator {
@@ -851,8 +851,8 @@
 
         @media (max-width: 480px) {
             .main-panel {
-                --base-main-panel-size: min(98vw, 98vh);
-                --base-main-panel-padding: min(20px, 4vh);
+                --base-main-panel-size: 98vmin;
+                --base-main-panel-padding: 4vmin;
                 border-radius: 20px;
             }
 
@@ -870,8 +870,9 @@
             }
 
             #date-text {
-                top: 10%;
-                --base-date-font-size: 4vw;
+                /* Use CSS variables for responsiveness */
+                top: var(--date-top-position);
+                left: var(--date-left-position);
             }
 
             #on-air-indicator {
@@ -1035,6 +1036,16 @@
             </div>
 
             <div class="control-group">
+                <label for="dateVerticalPositionSlider">Date Vertical Position:</label>
+                <input type="range" id="dateVerticalPositionSlider" min="0" max="100" step="1" value="20">
+            </div>
+
+            <div class="control-group">
+                <label for="dateHorizontalPositionSlider">Date Horizontal Position:</label>
+                <input type="range" id="dateHorizontalPositionSlider" min="0" max="100" step="1" value="50">
+            </div>
+
+            <div class="control-group">
                 <label for="colorSchemeSelect">Color Scheme:</label>
                 <select id="colorSchemeSelect">
                     <option value="zinc">Zinc (Default)</option>
@@ -1062,6 +1073,10 @@
                     <option value="digital-matrix-red">Digital Matrix (Red)</option>
                     <option value="digital-matrix-purple">Digital Matrix (Purple)</option>
                     <option value="digital-matrix-yellow">Digital Matrix (Yellow)</option>
+                    <option value="digital-matrix-cyan">Digital Matrix (Cyan)</option>
+                    <option value="digital-matrix-orange">Digital Matrix (Orange)</option>
+                    <option value="digital-matrix-white">Digital Matrix (White)</option>
+                    <option value="digital-matrix-lime">Digital Matrix (Lime)</option>
                     <option value="default">Default Gradient</option>
                     <option value="nebula">Nebula</option>
                     <option value="cyberpunk">Cyberpunk</option>
@@ -1133,9 +1148,11 @@
             <div class="flex flex-col gap-4">
                 <div class="flex gap-2 items-center">
                     <label for="newStartTime" class="text-white">Start:</label>
-                    <input type="time" id="newStartTime" class="flex-grow bg-gray-700 text-white p-2 rounded-md">
+                    <!-- Changed type to text and added pattern for 24-hour format, added w-32 for compact size -->
+                    <input type="text" id="newStartTime" placeholder="HH:MM" pattern="^([01]\d|2[0-3]):([0-5]\d)$" class="flex-grow bg-gray-700 text-white p-2 rounded-md w-32">
                     <label for="newEndTime" class="text-white">End:</label>
-                    <input type="time" id="newEndTime" class="flex-grow bg-gray-700 text-white p-2 rounded-md">
+                    <!-- Changed type to text and added pattern for 24-hour format, added w-32 for compact size -->
+                    <input type="text" id="newEndTime" placeholder="HH:MM" pattern="^([01]\d|2[0-3]):([0-5]\d)$" class="flex-grow bg-gray-700 text-white p-2 rounded-md w-32">
                 </div>
                 <div>
                     <label class="text-white block mb-2">Days:</label>
@@ -1445,6 +1462,46 @@
                     '--grid-color': 'rgba(255, 255, 0, 0.05)',
                     '--glass-bg': 'rgba(26, 26, 0, 0.4)',
                     '--text-shadow-color': 'rgba(255, 255, 0, 1)'
+                },
+                'digital-matrix-cyan': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#001a1a',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#001a1a',
+                    '--accent-color': '#00ffff', /* Cyan */
+                    '--grid-color': 'rgba(0, 255, 255, 0.05)',
+                    '--glass-bg': 'rgba(0, 26, 26, 0.4)',
+                    '--text-shadow-color': 'rgba(0, 255, 255, 1)'
+                },
+                'digital-matrix-orange': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a0d00',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a0d00',
+                    '--accent-color': '#ff8c00', /* Darker Orange */
+                    '--grid-color': 'rgba(255, 140, 0, 0.05)',
+                    '--glass-bg': 'rgba(26, 13, 0, 0.4)',
+                    '--text-shadow-color': 'rgba(255, 140, 0, 1)'
+                },
+                'digital-matrix-white': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#1a1a1a',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#1a1a1a',
+                    '--accent-color': '#ffffff', /* White */
+                    '--grid-color': 'rgba(255, 255, 255, 0.05)',
+                    '--glass-bg': 'rgba(26, 26, 26, 0.4)',
+                    '--text-shadow-color': 'rgba(255, 255, 255, 1)'
+                },
+                'digital-matrix-lime': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#0f1a00',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#0f1a00',
+                    '--accent-color': '#76ff03', /* Lime */
+                    '--grid-color': 'rgba(118, 255, 3, 0.05)',
+                    '--glass-bg': 'rgba(15, 26, 0, 0.4)',
+                    '--text-shadow-color': 'rgba(118, 255, 3, 1)'
                 }
             };
 
@@ -1508,6 +1565,11 @@
             const onAirToggle = document.getElementById('onAirToggle');
             const onAirIndicator = document.getElementById('on-air-indicator');
             const secondsSpan = document.getElementById('seconds'); // Get seconds span for pulse effect
+            const dateTextElement = document.getElementById('date-text'); // Get date text element
+
+            // Date position sliders
+            const dateVerticalPositionSlider = document.getElementById('dateVerticalPositionSlider');
+            const dateHorizontalPositionSlider = document.getElementById('dateHorizontalPositionSlider');
 
             // Progress bar elements
             const progressBarSelect = document.getElementById('progressBarSelect');
@@ -1640,6 +1702,14 @@
                 const newDays = Array.from(newEventDayCheckboxes)
                                     .filter(checkbox => checkbox.checked)
                                     .map(checkbox => parseInt(checkbox.value));
+
+                // Basic validation for 24-hour format
+                const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+                if (!timePattern.test(newStartTime) || !timePattern.test(newEndTime)) {
+                    console.warn('Please enter times in HH:MM (24-hour) format.');
+                    // Optionally, provide user feedback in the UI
+                    return;
+                }
 
                 if (newStartTime && newEndTime && newDays.length > 0) {
                     if (editingScheduleIndex !== null) {
@@ -1900,6 +1970,7 @@
                     for (const [prop, value] of Object.entries(scheme)) {
                         root.style.setProperty(prop, value);
                     }
+                    // When changing color scheme, also re-apply the background theme to pick up new primary/secondary colors
                     applyBackgroundTheme(backgroundThemeSelect.value);
                 }
             }
@@ -1930,6 +2001,16 @@
             fontScaleSlider.addEventListener('input', (event) => {
                 const fontScale = parseFloat(event.target.value);
                 root.style.setProperty('--font-scale-factor', fontScale);
+            });
+
+            dateVerticalPositionSlider.addEventListener('input', (event) => {
+                const topPosition = parseFloat(event.target.value);
+                root.style.setProperty('--date-top-position', `${topPosition}%`);
+            });
+
+            dateHorizontalPositionSlider.addEventListener('input', (event) => {
+                const leftPosition = parseFloat(event.target.value);
+                root.style.setProperty('--date-left-position', `${leftPosition}%`);
             });
 
             settingsButton.addEventListener('click', () => {
