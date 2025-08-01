@@ -38,15 +38,20 @@
             --background-gradient-end: var(--secondary-color);
 
             /* Dynamic Sizing */
-            --layout-scale-factor: 1.5;
+            /* Base sizes are in viewport units to ensure initial responsiveness */
+            --layout-scale-factor: 1.0; /* Start with 1.0, user can adjust */
             --font-scale-factor: 1.0;
-            --base-clock-font-size: 6vw;
-            --base-date-font-size: 2vw;
-            --base-main-panel-width: 90%;
-            --base-main-panel-height: 90%;
-            --base-main-panel-padding: 5vw;
-            --base-clock-circle-width: 80%;
-            --base-clock-circle-height: 80%;
+
+            --base-clock-font-size: 6vw; /* Base font size relative to viewport width */
+            --base-date-font-size: 2vw; /* Base font size relative to viewport width */
+
+            /* Main panel dimensions based on the smaller of viewport width/height */
+            --base-main-panel-size: min(90vw, 90vh);
+            --base-main-panel-padding: min(5vw, 5vh); /* Padding scales with viewport */
+
+            /* Clock circle dimensions relative to its parent (main-panel) */
+            --base-clock-circle-size: 80%; /* Percentage of parent */
+
 
             /* Font Families */
             --clock-font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* New default font */
@@ -120,12 +125,12 @@
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-radius: 50px;
+            /* Use base-main-panel-size for width and height, scaled by layout-scale-factor */
+            width: calc(var(--base-main-panel-size) * var(--layout-scale-factor));
+            height: calc(var(--base-main-panel-size) * var(--layout-scale-factor));
             padding: calc(var(--base-main-panel-padding) * var(--layout-scale-factor));
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: calc(900px * var(--layout-scale-factor));
-            width: calc(var(--base-main-panel-width) * var(--layout-scale-factor));
-            height: calc(var(--base-main-panel-height) * var(--layout-scale-factor));
             text-align: center;
             position: relative;
             z-index: 1;
@@ -137,6 +142,8 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            aspect-ratio: 1 / 1; /* Explicitly maintain square aspect ratio */
+            /* Removed max-width as min(vw, vh) handles scaling */
         }
 
         /* Subtle grid pattern inside the main panel */
@@ -159,24 +166,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
-            width: 100%;
+            height: 100%; /* Take full height of main-panel */
+            width: 100%; /* Take full width of main-panel */
             position: relative;
         }
 
         #clock-circle {
             position: relative;
-            /* Use vmin for consistent circularity based on the smaller viewport dimension */
-            width: calc(70vmin * var(--layout-scale-factor));
-            height: calc(70vmin * var(--layout-scale-factor));
+            /* Use base-clock-circle-size which is a percentage of its parent (main-panel) */
+            width: var(--base-clock-circle-size);
+            height: var(--base-clock-circle-size);
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            /* Explicitly enforce 1:1 aspect ratio */
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 1 / 1; /* Explicitly maintain circularity */
         }
 
         /* Progress Bar Styles */
@@ -231,7 +237,8 @@
         #clock-text {
             font-family: var(--clock-font-family);
             font-weight: 400;
-            font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            /* Simplified font size calculation */
+            font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
             color: var(--text-color);
             text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
             letter-spacing: 0.1em;
@@ -278,7 +285,7 @@
             top: 50%;
             left: 50%;
             width: 2px;
-            height: 45%; /* 45% of clock-circle's diameter, or 90% of its radius */
+            height: 45%; /* Made longer */
             background-color: var(--accent-color);
             transform-origin: bottom center;
             transform: translateX(-50%) translateY(-100%) rotate(0deg);
@@ -361,7 +368,8 @@
         #pulsing-glow-text {
             font-family: var(--clock-font-family);
             font-weight: 400;
-            font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            /* Simplified font size calculation */
+            font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor));
             color: transparent; /* Text color is transparent, only shadow is visible */
             text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
             letter-spacing: 0.1em;
@@ -437,7 +445,8 @@
 
         #date-text {
             font-family: var(--date-font-family);
-            font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+            /* Simplified font size calculation */
+            font-size: calc(var(--base-date-font-size) * var(--font-scale-factor));
             color: rgba(255, 255, 255, 0.8);
             text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
             text-align: center;
@@ -461,7 +470,7 @@
             border-radius: 10px;
             font-family: var(--control-font-family);
             font-weight: bold;
-            font-size: calc(1.5vw * var(--layout-scale-factor) * var(--font-scale-factor));
+            font-size: calc(1.5vw * var(--font-scale-factor)); /* Adjusted to use font-scale-factor */
             letter-spacing: 0.1em;
             text-shadow: 0 0 10px var(--danger-color);
             box-shadow: 0 0 15px var(--danger-color);
@@ -767,33 +776,35 @@
         /* Media queries for responsiveness */
         @media (max-width: 768px) {
             .main-panel {
-                padding: calc(30px * var(--layout-scale-factor));
-                width: calc(95% * var(--layout-scale-factor));
-                height: calc(95% * var(--layout-scale-factor));
-                border-radius: calc(30px * var(--layout-scale-factor));
+                /* Adjust base size for smaller screens */
+                --base-main-panel-size: min(95vw, 95vh);
+                --base-main-panel-padding: min(30px, 5vh); /* Use px for smaller padding */
+                border-radius: 30px; /* Fixed radius for consistency */
             }
 
             #clock-circle {
-                width: calc(90% * var(--layout-scale-factor));
-                height: calc(90% * var(--layout-scale-factor));
+                /* Adjust base size for smaller screens */
+                --base-clock-circle-size: 90%;
             }
 
             #clock-text {
-                font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+                /* Adjust base font size for smaller screens */
+                --base-clock-font-size: 8vw;
             }
 
             #clock-text span {
-                padding: calc(0 * var(--layout-scale-factor)) calc(1vw * var(--layout-scale-factor));
-                min-width: calc(5vw * var(--layout-scale-factor));
+                padding: 0 1vw;
+                min-width: 5vw;
             }
 
             #date-text {
                 top: 15%;
-                font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+                /* Adjust base font size for smaller screens */
+                --base-date-font-size: 3vw;
             }
 
             #on-air-indicator {
-                font-size: calc(2vw * var(--layout-scale-factor) * var(--font-scale-factor));
+                font-size: calc(2vw * var(--font-scale-factor));
             }
 
             #controls {
@@ -831,31 +842,31 @@
 
         @media (max-width: 480px) {
             .main-panel {
-                padding: calc(20px * var(--layout-scale-factor));
-                border-radius: calc(20px * var(--layout-scale-factor));
+                --base-main-panel-size: min(98vw, 98vh);
+                --base-main-panel-padding: min(20px, 4vh);
+                border-radius: 20px;
             }
 
             #clock-circle {
-                width: calc(95% * var(--layout-scale-factor));
-                height: calc(95% * var(--layout-scale-factor));
+                --base-clock-circle-size: 95%;
             }
 
             #clock-text {
-                font-size: calc(var(--base-clock-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+                --base-clock-font-size: 10vw;
             }
 
             #clock-text span {
-                padding: calc(0 * var(--layout-scale-factor)) calc(1.5vw * var(--layout-scale-factor));
-                min-width: calc(7vw * var(--layout-scale-factor));
+                padding: 0 1.5vw;
+                min-width: 7vw;
             }
 
             #date-text {
                 top: 10%;
-                font-size: calc(var(--base-date-font-size) * var(--layout-scale-factor) * var(--font-scale-factor));
+                --base-date-font-size: 4vw;
             }
 
             #on-air-indicator {
-                font-size: calc(2.5vw * var(--layout-scale-factor) * var(--font-scale-factor));
+                font-size: calc(2.5vw * var(--font-scale-factor));
             }
 
             #controls input[type="range"] {
@@ -988,7 +999,7 @@
             <div class="settings-section-title">Visuals & Progress</div>
             <div class="control-group">
                 <label for="layoutScaleSlider">Layout Scale:</label>
-                <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.5">
+                <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.0"> <!-- Default to 1.0 -->
             </div>
 
             <div class="control-group">
@@ -1126,10 +1137,7 @@
 
         // Global variable for analog seconds dots
         let analogSecondDotsElements = [];
-        // The dots should appear at the tip of the analog hand.
-        // If analog hand height is 45% (of diameter), its length is 0.45 * Diameter = 0.9 * Radius.
-        // So, the dots should be positioned at 90% of the radius.
-        const ANALOG_DOT_RADIUS_PERCENT = 90;
+        const ANALOG_DOT_RADIUS_PERCENT = 45; // Distance from center for the dots (percentage of clock-circle radius)
         const ANALOG_DOT_SIZE_PX = 6; // Size of the dot in pixels
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1288,6 +1296,15 @@
                     '--glass-bg': 'rgba(168, 224, 99, 0.4)',
                     '--grid-color': 'rgba(0, 0, 0, 0.03)',
                     '--text-shadow-color': 'rgba(0, 0, 0, 0.5)'
+                },
+                'digital-matrix': {
+                    '--background-gradient-start': '#000000',
+                    '--background-gradient-end': '#001a00',
+                    '--primary-color': '#000000',
+                    '--secondary-color': '#001a00',
+                    '--accent-color': '#00ff00',
+                    '--grid-color': 'rgba(0, 255, 0, 0.05)',
+                    '--glass-bg': 'rgba(0, 26, 0, 0.4)',
                 }
             };
 
@@ -1479,9 +1496,8 @@
                 // Calculate static position for each dot
                 // Angle for each second, starting from top (0 degrees at 12 o'clock)
                 const angleRad = (i / 60) * 2 * Math.PI - Math.PI / 2;
-                // Position dots at ANALOG_DOT_RADIUS_PERCENT of the clock-circle's radius
-                const x = 50 + (ANALOG_DOT_RADIUS_PERCENT / 100) * 50 * Math.cos(angleRad); // 50% is the radius in percentage
-                const y = 50 + (ANALOG_DOT_RADIUS_PERCENT / 100) * 50 * Math.sin(angleRad); // 50% is the radius in percentage
+                const x = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.cos(angleRad); // Percentage X
+                const y = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.sin(angleRad); // Percentage Y
 
                 dot.style.left = `calc(${x}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
                 dot.style.top = `calc(${y}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
@@ -1736,15 +1752,12 @@
                     }
                 } else if (selectedSecondHandStyle === 'bouncing-dot') {
                     bouncingDot.style.display = 'block';
-                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
-                    // The radius for positioning should be 50% of the clock-circle's diameter,
-                    // scaled by ANALOG_DOT_RADIUS_PERCENT / 100.
-                    const effectiveRadius = (ANALOG_DOT_RADIUS_PERCENT / 100) * 50;
+                    const radius = 45;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
-                    const x = centerX + effectiveRadius * Math.sin(angleRad);
-                    const y = centerY - effectiveRadius * Math.cos(angleRad);
+                    const x = centerX + radius * Math.sin(angleRad);
+                    const y = centerY - radius * Math.cos(angleRad);
                     bouncingDot.style.left = `calc(${x}% - 7.5px)`;
                     bouncingDot.style.top = `calc(${y}% - 7.5px)`;
                 } else if (selectedSecondHandStyle === 'pulsing-glow') {
@@ -1753,15 +1766,14 @@
                     pulsingGlowText.style.animation = 'pulse-glow 1s infinite alternate';
                 } else if (selectedSecondHandStyle === 'bouncing-tail-dot') {
                     bouncingTailDotContainer.style.display = 'block';
-                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
-                    const effectiveRadius = (ANALOG_DOT_RADIUS_PERCENT / 100) * 50;
+                    const radius = 45;
                     const centerX = 50;
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
 
                     // Current main dot position
-                    const currentMainX = centerX + effectiveRadius * Math.sin(angleRad);
-                    const currentMainY = centerY - effectiveRadius * Math.cos(angleRad);
+                    const currentMainX = centerX + radius * Math.sin(angleRad);
+                    const currentMainY = centerY - radius * Math.cos(angleRad);
 
                     // Add current position to history only if it's different from the last recorded position
                     // This prevents adding duplicate positions if the clock updates faster than seconds change
@@ -1791,8 +1803,7 @@
                     });
                 } else if (selectedSecondHandStyle === 'comet') {
                     cometSecondHand.style.display = 'block';
-                    // Use the updated ANALOG_DOT_RADIUS_PERCENT for consistency
-                    const effectiveRadius = (ANALOG_DOT_RADIUS_PERCENT / 100) * 50;
+                    const radius = 45; // Radius for positioning
                     const centerX = 50; // Percentage for center of clock-circle
                     const centerY = 50;
                     const secondAngle = (parseInt(seconds) / 60) * 360; // Angle in degrees
@@ -1804,8 +1815,8 @@
                     const cometHeight = 10; // Matches CSS height
 
                     const angleRad = secondAngle * Math.PI / 180;
-                    const headX = centerX + effectiveRadius * Math.sin(angleRad);
-                    const headY = centerY - effectiveRadius * Math.cos(angleRad);
+                    const headX = centerX + radius * Math.sin(angleRad);
+                    const headY = centerY - radius * Math.cos(angleRad);
 
                     // Adjust for the comet's own dimensions and its transform-origin
                     // The 'left' position needs to be `headX` (center of clock) - `radius` (distance to head)
@@ -1849,8 +1860,7 @@
             layoutScaleSlider.addEventListener('input', (event) => {
                 const layoutScale = parseFloat(event.target.value);
                 root.style.setProperty('--layout-scale-factor', layoutScale);
-                const currentFontSliderValue = parseFloat(fontScaleSlider.value);
-                root.style.setProperty('--font-scale-factor', currentFontSliderValue);
+                // No need to re-apply font-scale-factor here, it's independent
             });
 
             fontScaleSlider.addEventListener('input', (event) => {
