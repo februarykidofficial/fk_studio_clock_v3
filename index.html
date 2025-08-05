@@ -157,7 +157,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            /* Removed overflow: hidden; to allow glow effects to extend beyond the panel */
             aspect-ratio: 1 / 1; /* Explicitly maintain square aspect ratio */
         }
 
@@ -1281,7 +1281,7 @@
     <!-- Fullscreen button -->
     <button id="fullscreen-button" aria-label="Toggle Fullscreen">
         <svg id="fullscreen-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 1 2 2h3"/>
         </svg>
     </button>
 
@@ -1457,7 +1457,7 @@
                 }
             };
 
-            // Define background themes
+            /* Define background themes */
             const backgroundThemes = {
                 default: {
                     '--background-gradient-start': 'var(--primary-color)',
@@ -1615,7 +1615,7 @@
                 }
             };
 
-            // Define font families
+            /* Define font families */
             const fontFamilies = {
                 'sf-mono': "'SF Mono', Monaco, 'Cascadia Code', monospace",
                 'digital-7': "'Digital-7', sans-serif",
@@ -1628,7 +1628,7 @@
                 'cutive-mono': "'Cutive Mono', monospace"
             };
 
-            // Define date formatters
+            /* Define date formatters */
             const dateFormatters = {
                 'full': (date, tz) => new Intl.DateTimeFormat('en-US', {
                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz
@@ -1661,15 +1661,15 @@
                 }).format(date)
             };
 
-            // Get references to elements
+            /* Get references to elements */
             const root = document.documentElement;
             const layoutScaleSlider = document.getElementById('layoutScaleSlider');
             const fontScaleSlider = document = document.getElementById('fontScaleSlider');
             const controlsDiv = document.getElementById('controls');
             const settingsButton = document.getElementById('settings-button');
-            const fullscreenButton = document.getElementById('fullscreen-button'); // New fullscreen button
-            const fullscreenIcon = document.getElementById('fullscreen-icon'); // SVG icon inside the fullscreen button
-            const buildInfo = document.getElementById('build-info'); // Build info element
+            const fullscreenButton = document.getElementById('fullscreen-button'); /* New fullscreen button */
+            const fullscreenIcon = document.getElementById('fullscreen-icon'); /* SVG icon inside the fullscreen button */
+            const buildInfo = document.getElementById('build-info'); /* Build info element */
             const colorSchemeSelect = document.getElementById('colorSchemeSelect');
             const backgroundThemeSelect = document.getElementById('backgroundThemeSelect');
             const clockFontSelect = document.getElementById('clockFontSelect');
@@ -1677,28 +1677,28 @@
             const timeZoneSelect = document.getElementById('timeZoneSelect');
             const onAirToggle = document.getElementById('onAirToggle');
             const onAirIndicator = document.getElementById('on-air-indicator');
-            const secondsSpan = document.getElementById('seconds'); // Get seconds span for pulse effect
-            const dateTextElement = document.getElementById('date-text'); // Get date text element
-            const gridPattern = document.getElementById('gridPattern'); // Get grid pattern element
-            const gridPatternToggle = document.getElementById('gridPatternToggle'); // Get grid pattern toggle
-            const mainPanel = document.getElementById('mainPanel'); // Get main panel element
-            const mainPanelToggle = document.getElementById('mainPanelToggle'); // Get main panel toggle
+            const secondsSpan = document.getElementById('seconds'); /* Get seconds span for pulse effect */
+            const dateTextElement = document.getElementById('date-text'); /* Get date text element */
+            const gridPattern = document.getElementById('gridPattern'); /* Get grid pattern element */
+            const gridPatternToggle = document.getElementById('gridPatternToggle'); /* Get grid pattern toggle */
+            const mainPanel = document.getElementById('mainPanel'); /* Get main panel element */
+            const mainPanelToggle = document.getElementById('mainPanelToggle'); /* Get main panel toggle */
 
-            // Date position sliders
+            /* Date position sliders */
             const dateVerticalPositionSlider = document.getElementById('dateVerticalPositionSlider');
             const dateHorizontalPositionSlider = document.getElementById('dateHorizontalPositionSlider');
 
-            // Progress bar elements
+            /* Progress bar elements */
             const progressBarSelect = document.getElementById('progressBarSelect');
             const minuteBarProgressContainer = document.getElementById('minute-bar-progress-container');
             const minuteBarProgressRect = document.getElementById('minute-bar-progress-rect');
             const hourSegmentProgressContainer = document.getElementById('hour-segment-progress-container');
             const hourSegmentProgressRect = document.getElementById('hour-segment-progress-rect');
 
-            // Second hand style elements
+            /* Second hand style elements */
             const secondHandStyleSelect = document.getElementById('secondHandStyleSelect');
             const secondHandAnalog = document.getElementById('second-hand-analog');
-            const analogSecondsDotsContainer = document.getElementById('analog-seconds-dots'); // Container for analog dots
+            const analogSecondsDotsContainer = document.getElementById('analog-seconds-dots'); /* Container for analog dots */
             const bouncingDot = document.getElementById('bouncing-dot');
             const pulsingGlowContainer = document.getElementById('pulsing-glow-container');
             const pulsingGlowText = document.getElementById('pulsing-glow-text');
@@ -1706,7 +1706,7 @@
             const cometSecondHand = document.getElementById('comet-second-hand');
 
 
-            // Schedule modal elements
+            /* Schedule modal elements */
             const scheduleModal = document.getElementById('schedule-modal');
             const openScheduleModalBtn = document.getElementById('openScheduleModal');
             const closeScheduleModalBtn = document.getElementById('close-schedule-modal');
@@ -1718,29 +1718,29 @@
             const addUpdateScheduleEventBtn = document.getElementById('addUpdateScheduleEvent');
             const cancelEditScheduleEventBtn = document.getElementById('cancelEditScheduleEvent');
 
-            // Global variable to track if we are editing an event
+            /* Global variable to track if we are editing an event */
             let editingScheduleIndex = null;
 
-            // Initial schedule with default events
-            // Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            /* Initial schedule with default events */
+            /* Days: 0 = Sunday, 1 = Monday, ..., 6 = Saturday */
             let onAirSchedule = [
-                { startTime: '07:50', endTime: '08:55', days: [1, 2, 3, 4, 5] }, // Mon-Fri, changed end time
-                { startTime: '09:07', endTime: '10:35', days: [1, 2, 3, 4, 5] }, // New event for Mon-Fri
-                { startTime: '21:00', endTime: '22:30', days: [1] },  // Monday only
-                { startTime: '20:00', endTime: '21:30', days: [4] }   // Thursday only
+                { startTime: '07:50', endTime: '08:55', days: [1, 2, 3, 4, 5] }, /* Mon-Fri, changed end time */
+                { startTime: '09:07', endTime: '10:35', days: [1, 2, 3, 4, 5] }, /* New event for Mon-Fri */
+                { startTime: '21:00', endTime: '22:30', days: [1] },  /* Monday only */
+                { startTime: '20:00', endTime: '21:30', days: [4] }   /* Thursday only */
             ];
 
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-            // Initialize analog dots (pre-create 60 elements)
+            /* Initialize analog dots (pre-create 60 elements) */
             for (let i = 0; i < 60; i++) {
                 const dot = document.createElement('div');
                 dot.classList.add('analog-second-dot');
-                // Calculate static position for each dot
-                // Angle for each second, starting from top (0 degrees at 12 o'clock)
+                /* Calculate static position for each dot */
+                /* Angle for each second, starting from top (0 degrees at 12 o'clock) */
                 const angleRad = (i / 60) * 2 * Math.PI - Math.PI / 2;
-                const x = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.cos(angleRad); // Percentage X
-                const y = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.sin(angleRad); // Percentage Y
+                const x = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.cos(angleRad); /* Percentage X */
+                const y = 50 + ANALOG_DOT_RADIUS_PERCENT * Math.sin(angleRad); /* Percentage Y */
 
                 dot.style.left = `calc(${x}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
                 dot.style.top = `calc(${y}% - ${ANALOG_DOT_SIZE_PX / 2}px)`;
@@ -1750,7 +1750,7 @@
 
 
             function renderSchedule() {
-                scheduleList.innerHTML = ''; // Clear existing list
+                scheduleList.innerHTML = ''; /* Clear existing list */
                 if (onAirSchedule.length === 0) {
                     scheduleList.innerHTML = '<p class="text-center text-gray-400">No scheduled events.</p>';
                     return;
@@ -1776,17 +1776,17 @@
                     scheduleList.appendChild(entryDiv);
                 });
 
-                // Add event listeners to delete buttons
+                /* Add event listeners to delete buttons */
                 scheduleList.querySelectorAll('.schedule-entry button:last-child').forEach(button => {
                     button.addEventListener('click', (event) => {
                         const indexToDelete = parseInt(event.target.dataset.index);
                         onAirSchedule.splice(indexToDelete, 1);
                         renderSchedule();
-                        updateClock(); // Re-evaluate ON AIR status
+                        updateClock(); /* Re-evaluate ON AIR status */
                     });
                 });
 
-                // Add event listeners to edit buttons
+                /* Add event listeners to edit buttons */
                 scheduleList.querySelectorAll('.schedule-entry .edit-btn').forEach(button => {
                     button.addEventListener('click', (event) => {
                         editingScheduleIndex = parseInt(event.target.dataset.index);
@@ -1820,25 +1820,25 @@
                                     .filter(checkbox => checkbox.checked)
                                     .map(checkbox => parseInt(checkbox.value));
 
-                // Basic validation for 24-hour format
+                /* Basic validation for 24-hour format */
                 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
                 if (!timePattern.test(newStartTime) || !timePattern.test(newEndTime)) {
                     console.warn('Please enter times in HH:MM (24-hour) format.');
-                    // Optionally, provide user feedback in the UI
+                    /* Optionally, provide user feedback in the UI */
                     return;
                 }
 
                 if (newStartTime && newEndTime && newDays.length > 0) {
                     if (editingScheduleIndex !== null) {
-                        // Update existing event
+                        /* Update existing event */
                         onAirSchedule[editingScheduleIndex] = { startTime: newStartTime, endTime: newEndTime, days: newDays };
                     } else {
-                        // Add new event
+                        /* Add new event */
                         onAirSchedule.push({ startTime: newStartTime, endTime: newEndTime, days: newDays });
                     }
                     renderSchedule();
-                    updateClock(); // Re-evaluate ON AIR status
-                    clearNewEventForm(); // Clear inputs and reset button
+                    updateClock(); /* Re-evaluate ON AIR status */
+                    clearNewEventForm(); /* Clear inputs and reset button */
                 } else {
                     console.warn('Please fill in all fields for the schedule event.');
                 }
@@ -1848,7 +1848,7 @@
                 const selectedTimeZone = timeZoneSelect.value;
                 const now = new Date();
 
-                // Time formatting
+                /* Time formatting */
                 const timeOptions = {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -1866,25 +1866,25 @@
                 document.getElementById('hours').textContent = hours;
                 document.getElementById('minutes').textContent = minutes;
 
-                // Handle seconds span for pulse effect
+                /* Handle seconds span for pulse effect */
                 if (secondsSpan.textContent !== seconds) {
                     secondsSpan.classList.remove('second-pulse');
-                    void secondsSpan.offsetWidth; // Trigger reflow to restart animation
-                    secondsSpan.classList.add('second-pulse'); // Keep pulse for general update
+                    void secondsSpan.offsetWidth; /* Trigger reflow to restart animation */
+                    secondsSpan.classList.add('second-pulse'); /* Keep pulse for general update */
                 }
                 secondsSpan.textContent = seconds;
 
 
-                // Date formatting
+                /* Date formatting */
                 const selectedDateFormat = dateFormatSelect.value;
                 const dateString = dateFormatters[selectedDateFormat](now, selectedTimeZone);
                 document.getElementById('date-text').textContent = dateString;
 
-                // ON AIR indicator logic
+                /* ON AIR indicator logic */
                 const currentLocalTime = new Date(now.toLocaleString('en-US', { timeZone: selectedTimeZone }));
                 const currentHour = currentLocalTime.getHours();
                 const currentMinute = currentLocalTime.getMinutes();
-                const currentSecond = currentLocalTime.getSeconds(); // Get seconds for bouncing dot
+                const currentSecond = currentLocalTime.getSeconds(); /* Get seconds for bouncing dot */
                 const currentDay = currentLocalTime.getDay();
 
                 let isScheduledOnAir = false;
@@ -1923,12 +1923,12 @@
                     onAirIndicator.classList.remove('blinking');
                 }
 
-                // Update Progress Bars
+                /* Update Progress Bars */
                 const selectedProgressBar = progressBarSelect.value;
-                const hourSegmentWidth = 100; // SVG viewBox width is 100
-                const minuteBarWidth = 100; // SVG viewBox width is 100 (for rect width calculation)
+                const hourSegmentWidth = 100; /* SVG viewBox width is 100 */
+                const minuteBarWidth = 100; /* SVG viewBox width is 100 (for rect width calculation) */
 
-                // Hide all progress bars
+                /* Hide all progress bars */
                 minuteBarProgressContainer.style.display = 'none';
                 hourSegmentProgressContainer.style.display = 'none';
 
@@ -1947,25 +1947,25 @@
                 }
 
 
-                // Update Second Hand Styles (single selection)
+                /* Update Second Hand Styles (single selection) */
                 const selectedSecondHandStyle = secondHandStyleSelect.value;
                 
-                // First, hide/reset all second hand elements
+                /* First, hide/reset all second hand elements */
                 document.querySelectorAll('.second-hand-element').forEach(el => el.style.display = 'none');
-                pulsingGlowText.style.animation = 'none'; // Reset animation
-                secondsSpan.classList.remove('flicker-active'); // Ensure flicker is removed if not selected
+                pulsingGlowText.style.animation = 'none'; /* Reset animation */
+                secondsSpan.classList.remove('flicker-active'); /* Ensure flicker is removed if not selected */
 
-                // Reset bouncing tail dot history when style changes
+                /* Reset bouncing tail dot history when style changes */
                 if (selectedSecondHandStyle !== 'bouncing-tail-dot') {
                     bouncingTailDotPositions = [];
                 }
 
-                // Reset analog seconds dots when style changes
+                /* Reset analog seconds dots when style changes */
                 if (selectedSecondHandStyle !== 'analog-hand') {
                     analogSecondDotsElements.forEach(dot => {
-                        dot.classList.remove('visible', 'disappearing'); // Reset classes
-                        dot.style.opacity = '0'; // Ensure opacity is reset for next cycle
-                        dot.style.transform = 'scale(1)'; // Ensure scale is reset
+                        dot.classList.remove('visible', 'disappearing'); /* Reset classes */
+                        dot.style.opacity = '0'; /* Ensure opacity is reset for next cycle */
+                        dot.style.transform = 'scale(1)'; /* Ensure scale is reset */
                     });
                 }
 
@@ -1977,23 +1977,23 @@
 
                     analogSecondsDotsContainer.style.display = 'block';
 
-                    // Make the current second's dot visible
+                    /* Make the current second's dot visible */
                     const currentSecondInt = parseInt(seconds);
                     if (analogSecondDotsElements[currentSecondInt]) {
-                        // Only add 'visible' if it's not already there to avoid re-triggering transition
+                        /* Only add 'visible' if it's not already there to avoid re-triggering transition */
                         if (!analogSecondDotsElements[currentSecondInt].classList.contains('visible')) {
                             analogSecondDotsElements[currentSecondInt].classList.add('visible');
                         }
                     }
 
-                    // Disappearance animation for dots when seconds reset
+                    /* Disappearance animation for dots when seconds reset */
                     if (currentSecondInt === 0) {
-                        // Trigger disappearance for all dots from the previous cycle
+                        /* Trigger disappearance for all dots from the previous cycle */
                         analogSecondDotsElements.forEach(dot => {
                             if (dot.classList.contains('visible')) {
                                 dot.classList.add('disappearing');
-                                dot.classList.remove('visible'); // Remove visible class immediately
-                                // Remove disappearing class after animation to reset for next cycle
+                                dot.classList.remove('visible'); /* Remove visible class immediately */
+                                /* Remove disappearing class after animation to reset for next cycle */
                                 dot.addEventListener('transitionend', function handler() {
                                     dot.classList.remove('disappearing');
                                     dot.removeEventListener('transitionend', handler);
@@ -2022,17 +2022,17 @@
                     const centerY = 50;
                     const angleRad = (parseInt(seconds) / 60) * 2 * Math.PI;
 
-                    // Current main dot position
+                    /* Current main dot position */
                     const currentMainX = centerX + radius * Math.sin(angleRad);
                     const currentMainY = centerY - radius * Math.cos(angleRad);
 
-                    // Add current position to history only if it's different from the last recorded position
-                    // This prevents adding duplicate positions if the clock updates faster than seconds change
+                    /* Add current position to history only if it's different from the last recorded position */
+                    /* This prevents adding duplicate positions if the clock updates faster than seconds change */
                     const lastPos = bouncingTailDotPositions[0];
                     if (!lastPos || lastPos.x !== currentMainX || lastPos.y !== currentMainY) {
-                        bouncingTailDotPositions.unshift({ x: currentMainX, y: currentMainY }); // Add to front
+                        bouncingTailDotPositions.unshift({ x: currentMainX, y: currentMainY }); /* Add to front */
                         if (bouncingTailDotPositions.length > BOUNCING_TAIL_HISTORY_LENGTH) {
-                            bouncingTailDotPositions.pop(); // Remove oldest if history too long
+                            bouncingTailDotPositions.pop(); /* Remove oldest if history too long */
                         }
                     }
 
@@ -2041,42 +2041,42 @@
                     dotElements.forEach((segment, index) => {
                         if (bouncingTailDotPositions[index]) {
                             const pos = bouncingTailDotPositions[index];
-                            const segmentSize = 15 - (index * 3); // Decrease size for tail, main dot is index 0
+                            const segmentSize = 15 - (index * 3); /* Decrease size for tail, main dot is index 0 */
                             segment.style.width = `${segmentSize}px`;
                             segment.style.height = `${segmentSize}px`;
                             segment.style.left = `calc(${pos.x}% - ${segmentSize / 2}px)`;
                             segment.style.top = `calc(${pos.y}% - ${segmentSize / 2}px)`;
-                            segment.style.opacity = 1 - (index * 0.2); // Fade out tail dots
+                            segment.style.opacity = 1 - (index * 0.2); /* Fade out tail dots */
                             segment.style.display = 'block';
                         } else {
-                            segment.style.display = 'none'; // Hide if no history for this tail dot (e.g., at start)
+                            segment.style.display = 'none'; /* Hide if no history for this tail dot (e.g., at start) */
                         }
                     });
                 } else if (selectedSecondHandStyle === 'comet') {
                     cometSecondHand.style.display = 'block';
-                    const radius = 45; // Radius for positioning
-                    const centerX = 50; // Percentage for center of clock-circle
+                    const radius = 45; /* Radius for positioning */
+                    const centerX = 50; /* Percentage for center of clock-circle */
                     const centerY = 50;
-                    const secondAngle = (parseInt(seconds) / 60) * 360; // Angle in degrees
+                    const secondAngle = (parseInt(seconds) / 60) * 360; /* Angle in degrees */
 
-                    // Position the center of the comet element's head on the circle's path
-                    // The transform-origin is 0% 50%, so we position the element's top-left corner
-                    // such that its origin is at the desired point on the circle.
-                    const cometWidth = 100; // Matches CSS width
-                    const cometHeight = 10; // Matches CSS height
+                    /* Position the center of the comet element's head on the circle's path */
+                    /* The transform-origin is 0% 50%, so we position the element's top-left corner */
+                    /* such that its origin is at the desired point on the circle. */
+                    const cometWidth = 100; /* Matches CSS width */
+                    const cometHeight = 10; /* Matches CSS height */
 
                     const angleRad = secondAngle * Math.PI / 180;
                     const headX = centerX + radius * Math.sin(angleRad);
                     const headY = centerY - radius * Math.cos(angleRad);
 
-                    // Adjust for the comet's own dimensions and its transform-origin
-                    // The 'left' position needs to be `headX` (center of clock) - `radius` (distance to head)
-                    // The 'top' position needs to be `headY` (center of clock) - `half of comet's height`
-                    cometSecondHand.style.left = `calc(${headX}% - ${cometWidth * (0/100)}px)`; // 0% origin, so no X offset from headX
-                    cometSecondHand.style.top = `calc(${headY}% - ${cometHeight / 2}px)`; // Half of height for vertical centering
+                    /* Adjust for the comet's own dimensions and its transform-origin */
+                    /* The 'left' position needs to be `headX` (center of clock) - `radius` (distance to head) */
+                    /* The 'top' position needs to be `headY` (center of clock) - `half of comet's height` */
+                    cometSecondHand.style.left = `calc(${headX}% - ${cometWidth * (0/100)}px)`; /* 0% origin, so no X offset from headX */
+                    cometSecondHand.style.top = `calc(${headY}% - ${cometHeight / 2}px)`; /* Half of height for vertical centering */
 
-                    // Rotate the comet so its tail trails behind.
-                    // Adding 90 degrees aligns the element's horizontal axis with the tangent of the circle.
+                    /* Rotate the comet so its tail trails behind. */
+                    /* Adding 90 degrees aligns the element's horizontal axis with the tangent of the circle. */
                     cometSecondHand.style.transform = `rotate(${secondAngle + 90}deg)`;
                 }
             }
@@ -2087,7 +2087,7 @@
                     for (const [prop, value] of Object.entries(scheme)) {
                         root.style.setProperty(prop, value);
                     }
-                    // When changing color scheme, also re-apply the background theme to pick up new primary/secondary colors
+                    /* When changing color scheme, also re-apply the background theme to pick up new primary/secondary colors */
                     applyBackgroundTheme(backgroundThemeSelect.value);
                 }
             }
@@ -2108,11 +2108,11 @@
                 }
             }
 
-            // Event listeners
+            /* Event listeners */
             layoutScaleSlider.addEventListener('input', (event) => {
                 const layoutScale = parseFloat(event.target.value);
                 root.style.setProperty('--layout-scale-factor', layoutScale);
-                // No need to re-apply font-scale-factor here, it's independent
+                /* No need to re-apply font-scale-factor here, it's independent */
             });
 
             fontScaleSlider.addEventListener('input', (event) => {
@@ -2144,7 +2144,7 @@
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().then(() => {
                         document.body.classList.add('fullscreen-mode');
-                        // Change icon to minimize
+                        /* Change icon to minimize */
                         fullscreenIcon.innerHTML = `<path d="M8 3v2a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>`;
                         fullscreenIcon.classList.remove('lucide-maximize');
                         fullscreenIcon.classList.add('lucide-minimize');
@@ -2154,7 +2154,7 @@
                 } else {
                     document.exitFullscreen().then(() => {
                         document.body.classList.remove('fullscreen-mode');
-                        // Change icon to maximize
+                        /* Change icon to maximize */
                         fullscreenIcon.innerHTML = `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16h3a2 2 0 0 1 2 2v3"/>`;
                         fullscreenIcon.classList.remove('lucide-minimize');
                         fullscreenIcon.classList.add('lucide-maximize');
@@ -2164,17 +2164,17 @@
                 }
             });
 
-            // Listen for fullscreen change events to ensure UI updates even if exited by ESC key
+            /* Listen for fullscreen change events to ensure UI updates even if exited by ESC key */
             document.addEventListener('fullscreenchange', () => {
                 if (document.fullscreenElement) {
                     document.body.classList.add('fullscreen-mode');
-                    // Ensure icon is minimize
+                    /* Ensure icon is minimize */
                     fullscreenIcon.innerHTML = `<path d="M8 3v2a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>`;
                     fullscreenIcon.classList.remove('lucide-maximize');
                     fullscreenIcon.classList.add('lucide-minimize');
                 } else {
                     document.body.classList.remove('fullscreen-mode');
-                    // Ensure icon is maximize
+                    /* Ensure icon is maximize */
                     fullscreenIcon.innerHTML = `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16h3a2 2 0 0 1 2 2v3"/>`;
                     fullscreenIcon.classList.remove('lucide-minimize');
                     fullscreenIcon.classList.add('lucide-maximize');
@@ -2196,16 +2196,16 @@
             dateFormatSelect.addEventListener('change', updateClock);
             timeZoneSelect.addEventListener('change', updateClock);
             onAirToggle.addEventListener('change', updateClock);
-            progressBarSelect.addEventListener('change', updateClock); // Update on progress bar type change
+            progressBarSelect.addEventListener('change', updateClock); /* Update on progress bar type change */
             
-            // Event listener for second hand style select
+            /* Event listener for second hand style select */
             secondHandStyleSelect.addEventListener('change', (event) => {
-                // Reset bouncing tail dot history when style changes
+                /* Reset bouncing tail dot history when style changes */
                 bouncingTailDotPositions = [];
                 updateClock();
             });
 
-            // Event listener for grid pattern toggle
+            /* Event listener for grid pattern toggle */
             gridPatternToggle.addEventListener('change', (event) => {
                 if (event.target.checked) {
                     gridPattern.classList.remove('hidden');
@@ -2214,7 +2214,7 @@
                 }
             });
 
-            // Event listener for main panel toggle
+            /* Event listener for main panel toggle */
             mainPanelToggle.addEventListener('change', (event) => {
                 if (event.target.checked) {
                     mainPanel.classList.remove('transparent-frame');
@@ -2224,7 +2224,7 @@
             });
 
 
-            // Schedule Modal Event Listeners
+            /* Schedule Modal Event Listeners */
             openScheduleModalBtn.addEventListener('click', () => {
                 scheduleModal.classList.remove('hidden');
                 renderSchedule();
@@ -2232,7 +2232,7 @@
 
             closeScheduleModalBtn.addEventListener('click', () => {
                 scheduleModal.classList.add('hidden');
-                clearNewEventForm(); // Clear form when closing modal
+                clearNewEventForm(); /* Clear form when closing modal */
             });
 
             onAirScheduleToggle.addEventListener('change', updateClock);
@@ -2244,20 +2244,20 @@
                 checkbox.addEventListener('change', updateClock);
             });
 
-            // Initial calls and set interval for updates
-            // Apply default settings on load
+            /* Initial calls and set interval for updates */
+            /* Apply default settings on load */
             colorSchemeSelect.value = 'digital-matrix';
-            applyColorScheme('digital-matrix'); // Apply Digital Matrix theme by default
+            applyColorScheme('digital-matrix'); /* Apply Digital Matrix theme by default */
             backgroundThemeSelect.value = 'digital-matrix';
-            applyBackgroundTheme('digital-matrix'); // Apply Digital Matrix theme by default
+            applyBackgroundTheme('digital-matrix'); /* Apply Digital Matrix theme by default */
             clockFontSelect.value = 'sf-mono';
             applyClockFont('sf-mono');
             dateFormatSelect.value = 'short-dmy';
             timeZoneSelect.value = 'Europe/Warsaw';
-            progressBarSelect.value = 'minute-bar'; // Set default progress bar to Minute Bar
-            secondHandStyleSelect.value = 'analog-hand'; // Set default second hand style
-            gridPatternToggle.checked = true; // Ensure grid pattern is enabled by default
-            mainPanelToggle.checked = true; // Ensure main panel is enabled by default
+            progressBarSelect.value = 'minute-bar'; /* Set default progress bar to Minute Bar */
+            secondHandStyleSelect.value = 'analog-hand'; /* Set default second hand style */
+            gridPatternToggle.checked = true; /* Ensure grid pattern is enabled by default */
+            mainPanelToggle.checked = true; /* Ensure main panel is enabled by default */
 
             updateClock();
             setInterval(updateClock, 1000);
