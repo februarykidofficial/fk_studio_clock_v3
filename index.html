@@ -33,6 +33,10 @@
             --grid-color: rgba(0, 255, 0, 0.05); /* Green grid */
             --progress-bar-color: var(--accent-color); /* Default progress bar color */
 
+            /* Dynamic colors for pulsing effect */
+            --current-accent-color: var(--accent-color);
+            --current-text-shadow-color: var(--text-shadow-color);
+
             /* Background Themes */
             --background-gradient-start: var(--primary-color);
             --background-gradient-end: var(--secondary-color);
@@ -40,6 +44,7 @@
             /* Dynamic Sizing */
             --layout-scale-factor: 1.0; /* Start with 1.0, user can adjust */
             --font-scale-factor: 1.0;
+            --date-font-scale-factor: 1.0; /* New variable for date font scaling */
 
             /* Base sizes in viewport units (vmin for square consistency) */
             --base-main-panel-size: 90vmin;
@@ -58,12 +63,22 @@
 
             /* Effective font sizes that incorporate both font-scale-factor and layout-scale-factor */
             --effective-clock-font-size: calc(var(--base-clock-font-size) * var(--font-scale-factor) * var(--layout-scale-factor));
-            --effective-date-font-size: calc(var(--base-date-font-size) * var(--font-scale-factor) * var(--layout-scale-factor));
+            --effective-date-font-size: calc(var(--base-date-font-size) * var(--font-scale-factor) * var(--layout-scale-factor) * var(--date-font-scale-factor));
 
 
             /* Date position variables */
             --date-top-position: 20%;
             --date-left-position: 50%;
+
+            /* ON AIR Indicator Position & Size Variables */
+            --on-air-top-position: 10%;
+            --on-air-left-position: 50%;
+            --on-air-width: auto; /* Default to auto width */
+            --on-air-font-size: calc(1.5vw * var(--font-scale-factor));
+            --on-air-padding-x: 15px;
+            --on-air-padding-y: 5px;
+            --on-air-border-radius: 10px;
+
 
             /* Font Families */
             --clock-font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; /* New default font */
@@ -102,7 +117,7 @@
         /* SVG Glow Filter for minute bar */
         /* This filter is defined here and referenced by ID in CSS */
         .glow-filter {
-            filter: drop-shadow(0 0 5px var(--progress-bar-color)) drop-shadow(0 0 10px var(--progress-bar-color)) drop-shadow(0 0 15px var(--progress-bar-color));
+            filter: drop-shadow(0 0 5px var(--current-accent-color)) drop-shadow(0 0 10px var(--current-accent-color)) drop-shadow(0 0 15px var(--current-accent-color));
         }
 
         /* Background decoration */
@@ -245,7 +260,7 @@
         }
 
         #minute-bar-progress-rect {
-            fill: var(--progress-bar-color); /* Change to fill for a solid bar */
+            fill: var(--current-accent-color); /* Use current-accent-color */
             stroke: none; /* Remove stroke if it's a filled bar */
             height: 100%;
             width: 0%; /* Start at 0% width */
@@ -273,7 +288,7 @@
         }
 
         #hour-segment-progress-rect {
-            fill: var(--progress-bar-color);
+            fill: var(--current-accent-color); /* Use current-accent-color */
             stroke: none;
             height: 100%;
             width: 0%;
@@ -287,7 +302,7 @@
             /* Clock text font size now uses effective-clock-font-size */
             font-size: var(--effective-clock-font-size);
             color: var(--text-color);
-            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--current-text-shadow-color); /* Use current-text-shadow-color */
             letter-spacing: 0.1em;
             text-align: center;
             position: relative;
@@ -310,8 +325,8 @@
 
         /* Accent for seconds - subtle pulse effect */
         #seconds.second-pulse {
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.8) var(--accent-color);
-            color: var(--accent-color);
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) * 1.8) var(--current-accent-color); /* Use current-accent-color */
+            color: var(--current-accent-color); /* Use current-accent-color */
             animation: pulse-second 0.5s ease-out;
         }
 
@@ -333,12 +348,12 @@
             left: 50%;
             width: 2px;
             height: 45%; /* Made longer */
-            background-color: var(--accent-color);
+            background-color: var(--current-accent-color); /* Use current-accent-color */
             transform-origin: bottom center;
             transform: translateX(-50%) translateY(-100%) rotate(0deg);
             border-radius: 2px;
             z-index: 0;
-            filter: drop-shadow(0 0 5px var(--accent-color));
+            filter: drop-shadow(0 0 5px var(--current-accent-color)); /* Use current-accent-color */
             transition: transform 0.1s linear;
         }
 
@@ -352,7 +367,7 @@
             height: 10px;
             background-color: var(--text-color);
             border-radius: 50%;
-            border: 1px solid var(--accent-color);
+            border: 1px solid var(--current-accent-color); /* Use current-accent-color */
             box-shadow: 0 0 5px var(--text-color);
         }
 
@@ -372,9 +387,9 @@
             position: absolute;
             width: 6px; /* Size of the dot */
             height: 6px;
-            background-color: var(--accent-color);
+            background-color: var(--current-accent-color); /* Use current-accent-color */
             border-radius: 50%;
-            box-shadow: 0 0 3px var(--accent-color);
+            box-shadow: 0 0 3px var(--current-accent-color); /* Use current-accent-color */
             opacity: 0; /* Hidden by default */
             transition: opacity 0.1s ease-out, transform 0.3s ease-out; /* Smooth transition for appearing/disappearing */
         }
@@ -393,9 +408,9 @@
             position: absolute;
             width: 15px;
             height: 15px;
-            background-color: var(--accent-color);
+            background-color: var(--current-accent-color); /* Use current-accent-color */
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
+            box-shadow: 0 0 10px var(--current-accent-color), 0 0 20px var(--current-accent-color); /* Use current-accent-color */
             z-index: 2; /* Above clock text */
             transform-origin: 50% 50%; /* For rotation around its own center */
         }
@@ -418,7 +433,7 @@
             /* Pulsing glow text font size now uses effective-clock-font-size */
             font-size: var(--effective-clock-font-size);
             color: transparent; /* Text color is transparent, only shadow is visible */
-            text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color);
+            text-shadow: 0 0 var(--text-shadow-intensity) var(--current-text-shadow-color); /* Use current-text-shadow-color */
             letter-spacing: 0.1em;
             text-align: center;
             opacity: 0; /* Hidden by default */
@@ -426,9 +441,9 @@
         }
 
         @keyframes pulse-glow {
-            0% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--text-shadow-color); }
-            50% { opacity: 1; text-shadow: 0 0 var(--text-shadow-intensity) var(--text-shadow-color); }
-            100% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--text-shadow-color); }
+            0% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--current-text-shadow-color); }
+            50% { opacity: 1; text-shadow: 0 0 var(--text-shadow-intensity) var(--current-text-shadow-color); }
+            100% { opacity: 0.5; text-shadow: 0 0 calc(var(--text-shadow-intensity) * 0.5) var(--current-text-shadow-color); }
         }
 
         /* Bouncing Tail Dot Style */
@@ -444,9 +459,9 @@
 
         .bouncing-tail-dot-segment {
             position: absolute;
-            background-color: var(--accent-color);
+            background-color: var(--current-accent-color); /* Use current-accent-color */
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-color);
+            box-shadow: 0 0 10px var(--current-accent-color); /* Use current-accent-color */
             z-index: 2; /* Above clock text */
             transition: left 0.1s linear, top 0.1s linear, width 0.1s linear, height 0.1s linear, opacity 0.1s linear;
         }
@@ -481,10 +496,10 @@
             width: 100px; /* Length of the comet */
             height: 10px; /* Width of the comet */
             /* Linear gradient for the tail effect, from solid to transparent */
-            background: linear-gradient(to right, var(--accent-color) 0%, rgba(var(--accent-color), 0.8) 30%, transparent 100%);
+            background: linear-gradient(to right, var(--current-accent-color) 0%, rgba(var(--current-accent-color), 0.8) 30%, transparent 100%); /* Use current-accent-color */
             border-radius: 5px; /* Rounded ends for the shape */
             filter: blur(2px); /* Subtle blur for the tail */
-            box-shadow: 0 0 10px var(--accent-color), 0 0 20px rgba(var(--accent-color), 0.5); /* Stronger glow */
+            box-shadow: 0 0 10px var(--current-accent-color), 0 0 20px rgba(var(--current-accent-color), 0.5); /* Use current-accent-color */
             z-index: 2;
             transform-origin: 0% 50%; /* Pivot point is at the "head" of the comet */
         }
@@ -495,7 +510,7 @@
             /* Date text font size now uses effective-date-font-size */
             font-size: var(--effective-date-font-size);
             color: rgba(255, 255, 255, 0.8);
-            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--text-shadow-color);
+            text-shadow: 0 0 calc(var(--text-shadow-intensity) / 3) var(--current-text-shadow-color); /* Use current-text-shadow-color */
             text-align: center;
             position: absolute;
             top: var(--date-top-position); /* Use CSS variable */
@@ -508,21 +523,23 @@
         /* "ON AIR" Indicator */
         #on-air-indicator {
             position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: var(--on-air-top-position);
+            left: var(--on-air-left-position);
+            width: var(--on-air-width);
+            transform: translateX(-50%); /* Always center horizontally relative to its left position */
             background-color: var(--danger-color);
             color: var(--text-color);
-            padding: 5px 15px;
-            border-radius: 10px;
+            padding: var(--on-air-padding-y) var(--on-air-padding-x);
+            border-radius: var(--on-air-border-radius);
             font-family: var(--control-font-family);
             font-weight: bold;
-            font-size: calc(1.5vw * var(--font-scale-factor)); /* Adjusted to use font-scale-factor */
+            font-size: var(--on-air-font-size);
             letter-spacing: 0.1em;
             text-shadow: 0 0 10px var(--danger-color);
             box-shadow: 0 0 15px var(--danger-color);
             display: none;
             z-index: 3;
+            white-space: nowrap; /* Prevent text wrapping */
         }
 
         #on-air-indicator.blinking {
@@ -533,6 +550,41 @@
             0% { opacity: 1; }
             100% { opacity: 0.5; }
         }
+
+        /* ON AIR Indicator Styles */
+        #on-air-indicator.style-pill {
+            border-radius: 9999px; /* Fully rounded */
+            padding: var(--on-air-padding-y) calc(var(--on-air-padding-x) * 1.5);
+        }
+
+        #on-air-indicator.style-rectangle {
+            border-radius: 5px; /* Slightly rounded rectangle */
+        }
+
+        #on-air-indicator.style-circle {
+            width: calc(var(--on-air-font-size) * 2.5); /* Make it a circle based on font size */
+            height: calc(var(--on-air-font-size) * 2.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0; /* No padding for circle to control size directly */
+            text-align: center;
+            line-height: 1; /* Adjust line height for vertical centering */
+        }
+        #on-air-indicator.style-circle span {
+            display: block; /* Ensure text is centered within the circle */
+            transform: translateY(10%); /* Fine-tune vertical alignment */
+        }
+
+        #on-air-indicator.style-text-only {
+            background-color: transparent;
+            box-shadow: none;
+            text-shadow: 0 0 10px var(--danger-color);
+            padding: 0;
+            border-radius: 0;
+        }
+
 
         /* Controls styling */
         #controls {
@@ -547,20 +599,39 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             z-index: 10;
-            display: flex;
-            flex-direction: column; /* Changed to column for sections */
+            display: flex; /* Changed to flex for single column layout */
+            flex-direction: column; /* Stack sections vertically */
             gap: 20px; /* Gap between sections */
-            align-items: center;
+            align-items: center; /* Center items horizontally */
             color: var(--text-color);
             font-family: var(--control-font-family);
             font-size: 0.9rem;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            max-width: 95%;
-            justify-content: center;
+            max-width: 95vw; /* Allow wider controls */
+            max-height: 80vh; /* Max height for scrolling */
+            overflow-y: auto; /* Enable vertical scrolling */
             pointer-events: auto; /* Ensure pointer events are enabled by default */
         }
+
+        /* Scrollbar styling for controls */
+        #controls::-webkit-scrollbar {
+            width: 8px;
+            height: 8px; /* For horizontal scrollbar if needed */
+        }
+        #controls::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        #controls::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        #controls::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
 
         .settings-section {
             display: flex;
@@ -584,6 +655,9 @@
             margin-bottom: 10px;
             color: var(--accent-color);
         }
+
+        /* Removed collapsible section styling (details/summary) */
+
 
         .control-group {
             display: flex;
@@ -666,6 +740,34 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
         }
+
+        /* Slider center pointer */
+        .slider-with-pointer {
+            position: relative;
+        }
+
+        .slider-with-pointer::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%; /* Default center for symmetrical ranges */
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 12px; /* Slightly taller than the track */
+            background-color: var(--text-color); /* White line */
+            border-radius: 1px;
+            z-index: 10; /* Above the track, below the thumb */
+            pointer-events: none; /* Don't interfere with slider interaction */
+            opacity: 0.7;
+        }
+
+        /* Specific adjustments for sliders where 50% isn't the default value's visual center */
+        #onAirTopPositionSlider.slider-with-pointer::after { left: calc(10% + 2px); } /* 10% is default for 0-100 range */
+        #onAirLeftPositionSlider.slider-with-pointer::after { left: 50%; } /* 50% is default for 0-100 range */
+        /* Removed #onAirWidthSlider.slider-with-pointer::after rule */
+        #onAirFontSizeSlider.slider-with-pointer::after { left: calc( ((1.5 - 0.5) / (5 - 0.5)) * 100% + 2px); } /* 1.5 is default for 0.5-5 range */
+        #dateFontSizeSlider.slider-with-pointer::after { left: calc( ((1.0 - 0.5) / (2.0 - 0.5)) * 100% + 2px); } /* 1.0 is default for 0.5-2.0 range */
+
 
         /* Toggle button for on-air indicator */
         .toggle-switch {
@@ -862,8 +964,21 @@
             background-color: #0e9f6e;
         }
 
+        /* NEW RULE: Change edit button text color to black for digital-matrix-white theme */
+        body.digital-matrix-white-theme .schedule-entry .edit-btn {
+            color: black;
+        }
+
 
         /* Media queries for responsiveness */
+        @media (max-width: 1024px) { /* Adjust for smaller desktops/large tablets */
+            #controls {
+                /* Changed to flex for single column layout */
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-panel {
                 /* Adjust base size for smaller screens */
@@ -897,11 +1012,12 @@
             }
 
             #controls {
-                flex-direction: column;
+                flex-direction: column; /* Ensure single column on mobile */
                 gap: 10px;
                 padding: 10px 15px;
                 width: auto;
                 bottom: 10px;
+                max-width: 98vw; /* Ensure it fits on smaller screens */
             }
 
             .settings-section {
@@ -1004,7 +1120,7 @@
         <div class="grid-pattern" id="gridPattern"></div>
 
         <!-- ON AIR Indicator -->
-        <div id="on-air-indicator">ON AIR</div>
+        <div id="on-air-indicator"><span>ON AIR</span></div>
 
         <div id="clock-container">
             <div id="clock-circle">
@@ -1061,9 +1177,9 @@
 
     <!-- Controls for layout and font size -->
     <div id="controls">
-        <!-- Section 1: Clock Appearance -->
+        <!-- Section: Clock Appearance -->
         <div class="settings-section">
-            <div class="settings-section-title">Clock Appearance</div>
+            <h3 class="settings-section-title">Clock Appearance</h3>
             <div class="control-group">
                 <label for="clockFontSelect">Clock Font:</label>
                 <select id="clockFontSelect">
@@ -1109,29 +1225,38 @@
             </div>
         </div>
 
-        <!-- Section 2: Visuals & Progress -->
+        <!-- Section: Layout & Sizing -->
         <div class="settings-section">
-            <div class="settings-section-title">Visuals & Progress</div>
+            <h3 class="settings-section-title">Layout & Sizing</h3>
             <div class="control-group">
                 <label for="layoutScaleSlider">Layout Scale:</label>
-                <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.0"> <!-- Default to 1.0 -->
+                <input type="range" id="layoutScaleSlider" min="0.5" max="1.5" step="0.01" value="1.0" class="slider-with-pointer">
             </div>
 
             <div class="control-group">
                 <label for="fontScaleSlider">Font Scale:</label>
-                <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.0">
+                <input type="range" id="fontScaleSlider" min="0.8" max="1.8" step="0.01" value="1.0" class="slider-with-pointer">
+            </div>
+
+            <div class="control-group">
+                <label for="dateFontSizeSlider">Date Font Scale:</label>
+                <input type="range" id="dateFontSizeSlider" min="0.5" max="2.0" step="0.01" value="1.0" class="slider-with-pointer">
             </div>
 
             <div class="control-group">
                 <label for="dateVerticalPositionSlider">Date Vertical Position:</label>
-                <input type="range" id="dateVerticalPositionSlider" min="0" max="100" step="1" value="20">
+                <input type="range" id="dateVerticalPositionSlider" min="0" max="100" step="1" value="20" class="slider-with-pointer">
             </div>
 
             <div class="control-group">
                 <label for="dateHorizontalPositionSlider">Date Horizontal Position:</label>
-                <input type="range" id="dateHorizontalPositionSlider" min="0" max="100" step="1" value="50">
+                <input type="range" id="dateHorizontalPositionSlider" min="0" max="100" step="1" value="50" class="slider-with-pointer">
             </div>
+        </div>
 
+        <!-- Section: Colors & Backgrounds -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">Colors & Backgrounds</h3>
             <div class="control-group">
                 <label for="colorSchemeSelect">Color Scheme:</label>
                 <select id="colorSchemeSelect">
@@ -1177,27 +1302,6 @@
             </div>
 
             <div class="control-group">
-                <label for="progressBarSelect">Progress Bar:</label>
-                <select id="progressBarSelect">
-                    <option value="none">None</option>
-                    <option value="minute-bar">Minute Bar</option>
-                    <option value="hour-segment">Hour Segment</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label for="secondHandStyleSelect">Second Hand Style:</label>
-                <select id="secondHandStyleSelect">
-                    <option value="none">None</option>
-                    <option value="analog-hand">Analog Hand</option>
-                    <option value="bouncing-dot">Bouncing Dot</option>
-                    <option value="pulsing-glow">Pulsing Glow</option>
-                    <option value="bouncing-tail-dot">Bouncing Tail Dot</option>
-                    <option value="comet">Comet</option>
-                </select>
-            </div>
-
-            <div class="control-group">
                 <label for="gridPatternToggle">Enable Grid Pattern:</label>
                 <label class="toggle-switch">
                     <input type="checkbox" id="gridPatternToggle" checked>
@@ -1214,9 +1318,68 @@
             </div>
         </div>
 
-        <!-- Section 3: ON AIR Control -->
+        <!-- Section: Progress Indicators -->
         <div class="settings-section">
-            <div class="settings-section-title">ON AIR Control</div>
+            <h3 class="settings-section-title">Progress Indicators</h3>
+            <div class="control-group">
+                <label for="progressBarSelect">Progress Bar:</label>
+                <select id="progressBarSelect">
+                    <option value="none">None</option>
+                    <option value="minute-bar">Minute Bar</option>
+                    <option value="hour-segment">Hour Segment</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section: Second Hand Styles -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">Second Hand Styles</h3>
+            <div class="control-group">
+                <label for="secondHandStyleSelect">Second Hand Style:</label>
+                <select id="secondHandStyleSelect">
+                    <option value="none">None</option>
+                    <option value="analog-hand">Analog Hand</option>
+                    <option value="bouncing-dot">Bouncing Dot</option>
+                    <option value="pulsing-glow">Pulsing Glow</option>
+                    <option value="bouncing-tail-dot">Bouncing Tail Dot</option>
+                    <option value="comet">Comet</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section: ON AIR Indicator Settings -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">ON AIR Indicator Settings</h3>
+            <div class="control-group">
+                <label for="onAirTopPositionSlider">Vertical Position:</label>
+                <input type="range" id="onAirTopPositionSlider" min="0" max="100" step="1" value="10" class="slider-with-pointer">
+            </div>
+            <div class="control-group">
+                <label for="onAirLeftPositionSlider">Horizontal Position:</label>
+                <input type="range" id="onAirLeftPositionSlider" min="0" max="100" step="1" value="50" class="slider-with-pointer">
+            </div>
+            <div class="control-group">
+                <label for="onAirWidthSlider">Width (vw):</label>
+                <input type="range" id="onAirWidthSlider" min="5" max="50" step="1" value="auto" class="slider-with-pointer">
+            </div>
+            <div class="control-group">
+                <label for="onAirFontSizeSlider">Font Size (vw):</label>
+                <input type="range" id="onAirFontSizeSlider" min="0.5" max="5" step="0.1" value="1.5" class="slider-with-pointer">
+            </div>
+            <div class="control-group">
+                <label for="onAirStyleSelect">Indicator Style:</label>
+                <select id="onAirStyleSelect">
+                    <option value="pill">Pill</option>
+                    <option value="rectangle">Rectangle</option>
+                    <option value="circle">Circle</option>
+                    <option value="text-only">Text Only</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section: ON AIR Control -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">ON AIR Control</h3>
             <div class="control-group flex items-center gap-2">
                 <label for="onAirToggle">ON AIR:</label>
                 <label class="toggle-switch">
@@ -1297,6 +1460,9 @@
         let analogSecondDotsElements = [];
         const ANALOG_DOT_RADIUS_PERCENT = 45; // Distance from center for the dots (percentage of clock-circle radius)
         const ANALOG_DOT_SIZE_PX = 6; // Size of the dot in pixels
+
+        // Timeout ID for the pulsing effect to clear it if ON AIR is turned off
+        let pulseTimeoutId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             // Define color schemes
@@ -1664,7 +1830,7 @@
             /* Get references to elements */
             const root = document.documentElement;
             const layoutScaleSlider = document.getElementById('layoutScaleSlider');
-            const fontScaleSlider = document = document.getElementById('fontScaleSlider');
+            const fontScaleSlider = document.getElementById('fontScaleSlider');
             const controlsDiv = document.getElementById('controls');
             const settingsButton = document.getElementById('settings-button');
             const fullscreenButton = document.getElementById('fullscreen-button'); /* New fullscreen button */
@@ -1687,6 +1853,15 @@
             /* Date position sliders */
             const dateVerticalPositionSlider = document.getElementById('dateVerticalPositionSlider');
             const dateHorizontalPositionSlider = document.getElementById('dateHorizontalPositionSlider');
+            const dateFontSizeSlider = document.getElementById('dateFontSizeSlider'); /* New date font size slider */
+
+            /* ON AIR Indicator Position & Size Sliders */
+            const onAirTopPositionSlider = document.getElementById('onAirTopPositionSlider');
+            const onAirLeftPositionSlider = document.getElementById('onAirLeftPositionSlider');
+            const onAirWidthSlider = document.getElementById('onAirWidthSlider');
+            const onAirFontSizeSlider = document.getElementById('onAirFontSizeSlider');
+            const onAirStyleSelect = document.getElementById('onAirStyleSelect');
+
 
             /* Progress bar elements */
             const progressBarSelect = document.getElementById('progressBarSelect');
@@ -1915,12 +2090,53 @@
 
                 const isOnAir = onAirToggle.checked || isScheduledOnAir;
 
+                // Store current accent and text shadow colors before potential pulse override
+                const originalAccentColor = root.style.getPropertyValue('--accent-color');
+                const originalTextShadowColor = root.style.getPropertyValue('--text-shadow-color');
+
+
                 if (isOnAir) {
                     onAirIndicator.style.display = 'block';
                     onAirIndicator.classList.add('blinking');
+
+                    // Determine pulse colors based on current background theme
+                    let pulseAccentColor;
+                    let pulseTextShadowColor;
+
+                    if (backgroundThemeSelect.value === 'digital-matrix-red') {
+                        // If current theme is Digital Matrix Red, pulse to White
+                        pulseAccentColor = backgroundThemes['digital-matrix-white']['--accent-color'];
+                        pulseTextShadowColor = backgroundThemes['digital-matrix-white']['--text-shadow-color'];
+                    } else {
+                        // Otherwise, pulse to Digital Matrix Red
+                        pulseAccentColor = backgroundThemes['digital-matrix-red']['--accent-color'];
+                        pulseTextShadowColor = backgroundThemes['digital-matrix-red']['--text-shadow-color'];
+                    }
+
+                    // Apply pulsing effect to clock elements
+                    root.style.setProperty('--current-accent-color', pulseAccentColor);
+                    root.style.setProperty('--current-text-shadow-color', pulseTextShadowColor);
+
+                    // Clear any existing timeout to prevent multiple pulses
+                    if (pulseTimeoutId) {
+                        clearTimeout(pulseTimeoutId);
+                    }
+                    // Revert colors after 500ms
+                    pulseTimeoutId = setTimeout(() => {
+                        root.style.setProperty('--current-accent-color', originalAccentColor);
+                        root.style.setProperty('--current-text-shadow-color', originalTextShadowColor);
+                    }, 500);
+
                 } else {
                     onAirIndicator.style.display = 'none';
                     onAirIndicator.classList.remove('blinking');
+                    // Ensure colors are reset to default if ON AIR is off or pulse has ended
+                    root.style.setProperty('--current-accent-color', originalAccentColor);
+                    root.style.setProperty('--current-text-shadow-color', originalTextShadowColor);
+                    if (pulseTimeoutId) {
+                        clearTimeout(pulseTimeoutId);
+                        pulseTimeoutId = null;
+                    }
                 }
 
                 /* Update Progress Bars */
@@ -2099,6 +2315,11 @@
                         root.style.setProperty(prop, value);
                     }
                 }
+                // Add/remove a class on the body to allow for theme-specific styling
+                document.body.classList.remove('digital-matrix-white-theme'); // Remove previous theme class
+                if (themeName === 'digital-matrix-white') {
+                    document.body.classList.add('digital-matrix-white-theme');
+                }
             }
 
             function applyClockFont(fontName) {
@@ -2120,6 +2341,11 @@
                 root.style.setProperty('--font-scale-factor', fontScale);
             });
 
+            dateFontSizeSlider.addEventListener('input', (event) => {
+                const dateFontScale = parseFloat(event.target.value);
+                root.style.setProperty('--date-font-scale-factor', dateFontScale);
+            });
+
             dateVerticalPositionSlider.addEventListener('input', (event) => {
                 const topPosition = parseFloat(event.target.value);
                 root.style.setProperty('--date-top-position', `${topPosition}%`);
@@ -2129,6 +2355,31 @@
                 const leftPosition = parseFloat(event.target.value);
                 root.style.setProperty('--date-left-position', `${leftPosition}%`);
             });
+
+            /* ON AIR Indicator Position & Size Sliders Event Listeners */
+            onAirTopPositionSlider.addEventListener('input', (event) => {
+                const topPosition = parseFloat(event.target.value);
+                root.style.setProperty('--on-air-top-position', `${topPosition}%`);
+            });
+            onAirLeftPositionSlider.addEventListener('input', (event) => {
+                const leftPosition = parseFloat(event.target.value);
+                root.style.setProperty('--on-air-left-position', `${leftPosition}%`);
+            });
+            onAirWidthSlider.addEventListener('input', (event) => {
+                const width = event.target.value === 'auto' ? 'auto' : `${parseFloat(event.target.value)}vw`;
+                root.style.setProperty('--on-air-width', width);
+            });
+            onAirFontSizeSlider.addEventListener('input', (event) => {
+                const fontSize = parseFloat(event.target.value);
+                root.style.setProperty('--on-air-font-size', `${fontSize}vw`);
+            });
+            onAirStyleSelect.addEventListener('change', (event) => {
+                // Remove all style classes first
+                onAirIndicator.classList.remove('style-pill', 'style-rectangle', 'style-circle', 'style-text-only');
+                // Add the selected style class
+                onAirIndicator.classList.add(`style-${event.target.value}`);
+            });
+
 
             settingsButton.addEventListener('click', () => {
                 if (controlsDiv.style.opacity === '0' || controlsDiv.style.opacity === '') {
@@ -2258,6 +2509,17 @@
             secondHandStyleSelect.value = 'analog-hand'; /* Set default second hand style */
             gridPatternToggle.checked = true; /* Ensure grid pattern is enabled by default */
             mainPanelToggle.checked = true; /* Ensure main panel is enabled by default */
+            onAirStyleSelect.value = 'pill'; // Set default ON AIR style to pill
+            onAirIndicator.classList.add('style-pill'); // Apply default ON AIR style class
+
+            // Set default value for onAirWidthSlider to 'auto'
+            onAirWidthSlider.value = 'auto'; // Set the slider value to 'auto'
+            root.style.setProperty('--on-air-width', 'auto'); // Ensure CSS variable is 'auto'
+
+            // Set default value for dateFontSizeSlider
+            dateFontSizeSlider.value = 1.0;
+            root.style.setProperty('--date-font-scale-factor', 1.0);
+
 
             updateClock();
             setInterval(updateClock, 1000);
